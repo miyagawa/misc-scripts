@@ -4,7 +4,7 @@ use warnings;
 
 use Module::CoreList;
 
-my $mod = shift @ARGV or die "Usage: core_module Module\n";
+my $mod = shift @ARGV or die "Usage: coremod Module\n";
 
 my $ver = Module::CoreList->first_release($mod);
 if ($ver) {
