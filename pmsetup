@@ -1,0 +1,156 @@
+#!/usr/bin/perl
+#
+# Tatsuhiko Miyagawa <miyagawa@bulknews.net>
+#
+
+use strict;
+use FileHandle;
+use File::Copy;
+use File::Path;
+
+#--------------------------------------------------
+# Config
+my $Credit = 'Author E<lt>author@galaxyE<gt>';
+#--------------------------------------------------
+
+my $modname = shift or die "Usage: $0 module\n";
+my @pkg = split /::/, $modname;
+
+mkdir_chdir(@pkg);
+mk_makefile_pl($modname, @pkg);
+my $libdir = mk_libdir_t_dir(@pkg);
+mk_test_suite($modname);
+mk_changes($modname);
+mk_module_template($libdir, $modname, @pkg);
+mk_manifest();
+prepare_make();
+
+sub mkdir_chdir {
+    my @pkg = @_;
+    # mkdir Foo-Bar
+    my $moddir = join('-', @pkg);
+    mkdir $moddir, 0777;
+    chdir $moddir;
+}
+
+sub mk_makefile_pl {
+    my($modname, @pkg) = @_;
+
+    # Makefile.PL
+    my $path = join('/', @pkg). '.pm';
+    my $mk = FileHandle->new('>Makefile.PL') or die $!;
+    $mk->print(<<MK);
+use ExtUtils::MakeMaker;
+WriteMakefile(
+    'NAME'      => '$modname',
+    'VERSION_FROM' => 'lib/$path', # finds \$VERSION
+    'PREREQ_PM' => {
+	Test::More => 0.32,
+    },
+);
+MK
+    ;
+}
+
+sub mk_libdir_t_dir {
+    my @pkg = @_;
+
+    # lib/Foo/ & t/
+    my $libdir = 'lib/' . join '/', @pkg[0..$#pkg-1];
+    mkpath([ $libdir, 't' ], 1, 0777);
+    return $libdir;
+}
+
+sub mk_test_suite {
+    my $modname = shift;
+
+    # test suite
+    my $test = FileHandle->new(">t/00_compile.t") or die $!;
+    $test->print(<<TEST);
+use strict;
+use Test::More tests => 1;
+
+BEGIN { use_ok '$modname' }
+TEST
+    ;
+}
+
+sub mk_changes {
+    my $modname = shift;
+
+    my $localtime = localtime;
+    my $changes = FileHandle->new("> Changes") or die $!;
+    $changes->print(<<CHANGES);
+Revision history for Perl extension $modname
+
+0.01  $localtime
+	- original version
+CHANGES
+    ;
+}
+
+sub mk_module_template {
+    my($libdir, $modname, @pkg) = @_;
+    my $module = FileHandle->new(">$libdir/$pkg[$#pkg].pm") or die $!;
+    $module->print(<<MODULE);
+package $modname;
+
+use strict;
+use vars qw(\$VERSION);
+\$VERSION = '0.01';
+
+1;
+__END__
+
+=head1 NAME
+
+$modname -
+
+=head1 SYNOPSIS
+
+  use $modname;
+
+=head1 DESCRIPTION
+
+$modname is
+
+=head1 AUTHOR
+
+$Credit
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+L<>
+
+=cut
+MODULE
+    ;
+}
+
+sub mk_manifest {
+    my $mani = FileHandle->new(">MANIFEST.SKIP") or die $!;
+    $mani->print(<<'MANI');
+\bRCS\b
+\bCVS\b
+^MANIFEST\.
+^Makefile$
+~$
+\.old$
+^blib/
+^pm_to_blib
+^MakeMaker-\d
+\.gz$
+\.cvsignore
+MANI
+    ;
+}
+
+sub prepare_make {
+    do "Makefile.PL";
+    !system 'make test' or die $?;
+    !system 'make manifest' or die $?;
+    !system 'make distclean' or die $?;
+}
