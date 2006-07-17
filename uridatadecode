@@ -1,0 +1,6 @@
+#!/usr/bin/perl
+use URI;
+my $uri = URI->new(join "", <>);
+$uri->scheme eq 'data' or die "Input data is not data URI";
+print $uri->data;
+
