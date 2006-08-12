@@ -1,0 +1,8 @@
+#!/usr/bin/perl
+my $sig = $ARGV[0] || 2;
+   $sig =~ s/^-(\d+)/$1/;
+
+while (<>) {
+    my($pid) = (split /\s+/)[1];
+    kill $sig, $pid;
+}
