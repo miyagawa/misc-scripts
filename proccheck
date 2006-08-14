@@ -1,0 +1,14 @@
+#!/usr/bin/perl
+use strict;
+my $proc = shift;
+my $num  = shift || 1;
+my $command = shift;
+my @lines = qx(ps auxww | grep $proc | grep -v grep | grep -v proccheck);
+if (@lines < $num) {
+    if ($command) {
+	system $command;
+    } else {
+	exit(1);
+    }
+}
+
