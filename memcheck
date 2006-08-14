@@ -1,0 +1,17 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+my $proc = shift;
+my $mem  = shift or die "Usage: memcheck process memory signal";
+my $sig  = shift || 2;
+   $sig =~ s/^-//;
+
+my @lines = qx(ps auxww | grep $proc | grep -v grep | grep -v memcheck);
+unless (@lines) { exit }
+
+my($pid, $memory) = (split /\s+/, $lines[0])[1,4];
+if ($memory > $mem) {
+    warn "killing $pid since $proc memory usage is $memory (> $mem)";
+    kill $sig, $pid or die $!;
+}
