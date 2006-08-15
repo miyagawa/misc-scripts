@@ -1,0 +1,12 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use Net::Rendezvous;
+
+my $proto = shift @ARGV || "Usage: bonjourfind protocol\n";
+my $res = Net::Rendezvous->new($proto);
+$res->discover;
+
+for my $entry ($res->entries) {
+    printf "%s %s:%s\n", $entry->name, $entry->address, $entry->port;
+}
