@@ -56,10 +56,10 @@ sub mk_makefile_pl {
     my $mk = FileHandle->new('>Makefile.PL') or die $!;
     $mk->print(<<MK);
 use inc::Module::Install;
-name('$dist');
-all_from('lib/$path');
+name '$dist';
+all_from 'lib/$path';
 
-build_requires('Test::More');
+build_requires 'Test::More';
 auto_include;
 WriteAll;
 MK
