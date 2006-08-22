@@ -17,6 +17,11 @@ while (! $config->{author}) {
     $save++;
 }
 
+while (! $config->{email}) {
+    $config->{email} = prompt("Your email: ", '');
+    $save++;
+}
+
 my $modname = shift @ARGV or die "Usage: $0 module\n";
 my @pkg = split /::/, $modname;
 
@@ -26,6 +31,7 @@ my $libdir = mk_libdir_t_dir(@pkg);
 mk_test_suite($modname);
 mk_changes($modname);
 mk_module_template($libdir, $modname, @pkg);
+mk_readme($modname);
 mk_manifest();
 prepare_make();
 
@@ -132,7 +138,7 @@ $modname is
 
 =head1 AUTHOR
 
-$config->{author}
+$config->{author} E<lt>$config->{email}E<gt>
 
 =head1 LICENSE
 
@@ -162,6 +168,40 @@ sub mk_manifest {
 \.cvsignore
 MANI
     ;
+}
+
+sub mk_readme {
+    my $mod  = shift;
+    my $file = FileHandle->new(">README") or die $!;
+    $file->print(<<EOF);
+This is Perl module $mod.
+
+INSTALLATION
+
+$mod installation is straightforward. If your CPAN shell is set up,
+you should just be able to do
+
+    % cpan $mod
+
+Download it, unpack it, then build it as per the usual:
+
+    % perl Makefile.PL
+    % make && make test
+
+Then install it:
+
+    % make install
+
+DOCUMENTATION
+
+$mod documentation is available as in POD. So you can do:
+
+    % perldoc $mod
+
+to read the documentation online with your favorite pager.
+
+$config->{author}
+EOF
 }
 
 sub prepare_make {
