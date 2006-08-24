@@ -113,43 +113,43 @@ template: |
 file: Changes
 template: |
   Revision history for Perl extension [% module %]
-  
+
     0.01  [% localtime %]
           - original version
 ---
 file: lib/$path
 template: |
   package [% module %];
-  
+
   use strict;
   our $VERSION = '0.01';
-  
+
   1;
   __END__
-  
+
   =head1 NAME
-  
+
   [% module %] -
-  
+
   =head1 SYNOPSIS
-  
+
     use [% module %];
-  
+
   =head1 DESCRIPTION
-  
+
   [% module %] is
-  
+
   =head1 AUTHOR
-  
+
   [% config.author %] E<lt>[% config.email %]E<gt>
-  
+
   =head1 LICENSE
-  
+
   This library is free software; you can redistribute it and/or modify
   it under the same terms as Perl itself.
-  
+
   =head1 SEE ALSO
-  
+
   =cut
 ---
 file: MANIFEST.SKIP
@@ -169,29 +169,29 @@ template: |
 file: README
 template: |
   This is Perl module [% module %].
-  
+
   INSTALLATION
-  
+
   [% module %] installation is straightforward. If your CPAN shell is set up,
   you should just be able to do
-  
+
       % cpan [% module %]
-  
+
   Download it, unpack it, then build it as per the usual:
-  
+
       % perl Makefile.PL
       % make && make test
-  
+
   Then install it:
-  
+
       % make install
-  
+
   DOCUMENTATION
-  
+
   [% module %] documentation is available as in POD. So you can do:
-  
+
       % perldoc [% module %]
-  
+
   to read the documentation online with your favorite pager.
-  
+
   [% config.author %]
