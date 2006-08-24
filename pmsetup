@@ -2,10 +2,10 @@
 use strict;
 use warnings;
 use ExtUtils::MakeMaker qw(prompt);
-use FileHandle;
-use File::Copy;
+use File::Basename;
 use File::Path;
 use File::Spec;
+use Template;
 use YAML;
 
 my $path   = File::Spec->catfile($ENV{HOME}, "/.pmsetuprc");
@@ -23,190 +23,175 @@ while (! $config->{email}) {
 }
 
 my $modname = shift @ARGV or die "Usage: $0 module\n";
-my @pkg = split /::/, $modname;
+   $modname =~ s/-/::/g;
 
-mkdir_chdir(@pkg);
-mk_makefile_pl($modname, @pkg);
-my $libdir = mk_libdir_t_dir(@pkg);
-mk_test_suite($modname);
-mk_changes($modname);
-mk_module_template($libdir, $modname, @pkg);
-mk_readme($modname);
-mk_manifest();
-prepare_make();
+write_plugin_files($modname, $config);
 
 END {
     YAML::DumpFile($path, $config) if $save;
 }
 
-sub mkdir_chdir {
-    my @pkg = @_;
-    # mkdir Foo-Bar
-    my $moddir = join('-', @pkg);
-    mkdir $moddir, 0777;
-    chdir $moddir;
-}
+sub write_plugin_files {
+    my($module, $config) = @_;
 
-sub mk_makefile_pl {
-    my($modname, @pkg) = @_;
+    # $module = "Foo::Bar"
+    # $dist   = "Foo-Bar"
+    # $path   = "Foo/Bar.pm"
+    my @pkg  = split /::/, $module;
+    my $dist = join "-", @pkg;
+    my $path = join("/", @pkg) . ".pm";
 
-    # Makefile.PL
-    my $dist = join('-', @pkg);
-    my $path = join('/', @pkg). '.pm';
-    my $mk = FileHandle->new('>Makefile.PL') or die $!;
-    $mk->print(<<MK);
-use inc::Module::Install;
-name '$dist';
-all_from 'lib/$path';
+    mkdir $dist, 0777;
+    chdir $dist;
 
-build_requires 'Test::More';
-auto_include;
-WriteAll;
-MK
-}
+    my @template = YAML::Load(join '', <DATA>);
+    my $vars = { module => $module, dist => $dist, path => $path,
+                 config => $config, localtime => scalar localtime };
 
-sub mk_libdir_t_dir {
-    my @pkg = @_;
+    for my $tmpl (@template) {
+        my $file = $tmpl->{file};
+           $file =~ s/(\$\w+)/$1/eeg;
+        write_file($file, $tmpl->{template}, $vars);
+    }
 
-    # lib/Foo/ & t/
-    my $libdir = 'lib/' . join '/', @pkg[0..$#pkg-1];
-    mkpath([ $libdir, 't' ], 1, 0777);
-    return $libdir;
-}
-
-sub mk_test_suite {
-    my $modname = shift;
-
-    # test suite
-    my $test = FileHandle->new(">t/00_compile.t") or die $!;
-    $test->print(<<TEST);
-use strict;
-use Test::More tests => 1;
-
-BEGIN { use_ok '$modname' }
-TEST
-    ;
-
-    $test = FileHandle->new(">t/99_pod.t") or die $!;
-    $test->print(<<'TEST');
-use Test::More;
-eval "use Test::Pod 1.00";
-plan skip_all => "Test::Pod 1.00 required for testing POD" if $@;
-all_pod_files_ok();
-TEST
-    ;
-}
-
-sub mk_changes {
-    my $modname = shift;
-
-    my $localtime = localtime;
-    my $changes = FileHandle->new("> Changes") or die $!;
-    $changes->print(<<CHANGES);
-Revision history for Perl extension $modname
-
-0.01  $localtime
-	- original version
-CHANGES
-    ;
-}
-
-sub mk_module_template {
-    my($libdir, $modname, @pkg) = @_;
-    my $module = FileHandle->new(">$libdir/$pkg[$#pkg].pm") or die $!;
-    $module->print(<<MODULE);
-package $modname;
-
-use strict;
-use 5.8.0;
-our \$VERSION = '0.01';
-
-1;
-__END__
-
-=head1 NAME
-
-$modname -
-
-=head1 SYNOPSIS
-
-  use $modname;
-
-=head1 DESCRIPTION
-
-$modname is
-
-=head1 AUTHOR
-
-$config->{author} E<lt>$config->{email}E<gt>
-
-=head1 LICENSE
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-=head1 SEE ALSO
-
-=cut
-MODULE
-    ;
-}
-
-sub mk_manifest {
-    my $mani = FileHandle->new(">MANIFEST.SKIP") or die $!;
-    $mani->print(<<'MANI');
-\bRCS\b
-\bCVS\b
-^MANIFEST\.
-^Makefile$
-~$
-\.old$
-^blib/
-^pm_to_blib
-^MakeMaker-\d
-\.gz$
-\.cvsignore
-MANI
-    ;
-}
-
-sub mk_readme {
-    my $mod  = shift;
-    my $file = FileHandle->new(">README") or die $!;
-    $file->print(<<EOF);
-This is Perl module $mod.
-
-INSTALLATION
-
-$mod installation is straightforward. If your CPAN shell is set up,
-you should just be able to do
-
-    % cpan $mod
-
-Download it, unpack it, then build it as per the usual:
-
-    % perl Makefile.PL
-    % make && make test
-
-Then install it:
-
-    % make install
-
-DOCUMENTATION
-
-$mod documentation is available as in POD. So you can do:
-
-    % perldoc $mod
-
-to read the documentation online with your favorite pager.
-
-$config->{author}
-EOF
-}
-
-sub prepare_make {
     !system "perl Makefile.PL" or die $?;
     !system 'make test' or die $?;
     !system 'make manifest' or die $?;
     !system 'make distclean' or die $?;
 }
+
+sub write_file {
+    my($path, $template, $vars) = @_;
+
+    if (-e $path) {
+        my $ans = prompt("$path exists. Override? [yN] ", 'n');
+        return if $ans !~ /[Yy]/;
+    }
+
+    my $dir = File::Basename::dirname($path);
+    unless (-e $dir) {
+        warn "Creating directory $dir\n";
+        File::Path::mkpath($dir, 1, 0777);
+    }
+
+    my $tt = Template->new;
+    $tt->process(\$template, $vars, \my $content);
+
+    warn "Creating $path\n";
+    open my $out, ">", $path or die "$path: $!";
+    print $out $content;
+    close $out;
+}
+
+__DATA__
+---
+file: Makefile.PL
+template: |
+  use inc::Module::Install;
+  name '[% dist %]';
+  all_from 'lib/[% path %]';
+
+  build_requires 'Test::More';
+  auto_include;
+  WriteAll;
+
+---
+file: t/00_compile.t
+template: |
+  use strict;
+  use Test::More tests => 1;
+
+  BEGIN { use_ok '[% module %]' }
+---
+file: t/99_pod.t
+template: |
+  use Test::More;
+  eval "use Test::Pod 1.00";
+  plan skip_all => "Test::Pod 1.00 required for testing POD" if $@;
+  all_pod_files_ok();
+---
+file: Changes
+template: |
+  Revision history for Perl extension [% module %]
+  
+    0.01  [% localtime %]
+          - original version
+---
+file: lib/$path
+template: |
+  package [% module %];
+  
+  use strict;
+  our $VERSION = '0.01';
+  
+  1;
+  __END__
+  
+  =head1 NAME
+  
+  [% module %] -
+  
+  =head1 SYNOPSIS
+  
+    use [% module %];
+  
+  =head1 DESCRIPTION
+  
+  [% module %] is
+  
+  =head1 AUTHOR
+  
+  [% config.author %] E<lt>[% config.email %]E<gt>
+  
+  =head1 LICENSE
+  
+  This library is free software; you can redistribute it and/or modify
+  it under the same terms as Perl itself.
+  
+  =head1 SEE ALSO
+  
+  =cut
+---
+file: MANIFEST.SKIP
+template: |
+  \bRCS\b
+  \bCVS\b
+  ^MANIFEST\.
+  ^Makefile$
+  ~$
+  \.old$
+  ^blib/
+  ^pm_to_blib
+  ^MakeMaker-\d
+  \.gz$
+  \.cvsignore
+---
+file: README
+template: |
+  This is Perl module [% module %].
+  
+  INSTALLATION
+  
+  [% module %] installation is straightforward. If your CPAN shell is set up,
+  you should just be able to do
+  
+      % cpan [% module %]
+  
+  Download it, unpack it, then build it as per the usual:
+  
+      % perl Makefile.PL
+      % make && make test
+  
+  Then install it:
+  
+      % make install
+  
+  DOCUMENTATION
+  
+  [% module %] documentation is available as in POD. So you can do:
+  
+      % perldoc [% module %]
+  
+  to read the documentation online with your favorite pager.
+  
+  [% config.author %]
