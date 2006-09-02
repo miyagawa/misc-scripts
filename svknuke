@@ -1,0 +1,10 @@
+#!/usr/bin/perl
+use strict;
+system("svk cleanup");
+unlink "$ENV{HOME}/.svk/lock"; # don't care about failure
+
+my $info = `svk info`;
+if ($info && $info =~ m|Depot Path: (//mirror/\w+)/|) {
+    system ("svk mirror --unlock $1");
+}
+
