@@ -30,6 +30,7 @@ main();
 
 sub main {
     setup_config();
+    setup_term_encoding();
 
     GetOptions(\%args, "tags=s", "tag=s@", "group=s") or pod2usage(2);
     
@@ -116,6 +117,16 @@ END_WELCOME
 
     YAML::DumpFile($CONFFILE, \%config);
     chmod 0600, $CONFFILE;
+}
+
+sub setup_term_encoding {
+    my $encoding;
+    eval {
+        require Term::Encoding;
+        $encoding = Term::Encoding::get_encoding();
+    };
+    $encoding ||= "utf-8";
+    binmode STDOUT, ":encoding($encoding)";
 }
 
 =head1 TASKS
