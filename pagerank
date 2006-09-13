@@ -1,0 +1,13 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+use WWW::Google::PageRank;
+
+my $url = shift @ARGV or die "Usage: pagerank URL\n";
+unless ($url =~ m!^http!) {
+    $url = "http://$url";
+}
+
+my $pr = WWW::Google::PageRank->new;
+print "Page Rank: ", scalar($pr->get($url)) || 0, "\n";
