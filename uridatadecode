@@ -1,6 +1,22 @@
 #!/usr/bin/perl
+use strict;
+use Pod::Usage;
 use URI;
+
 my $uri = URI->new(join "", <>);
-$uri->scheme eq 'data' or die "Input data is not data URI";
+$uri->scheme eq 'data' or pod2usage("Input data is not data URI");
 print $uri->data;
 
+__END__
+
+=head1 NAME
+
+uridatadecode - decodes data: URI scheme and print it to STDOUT
+
+=head1 SYNOPSIS
+
+  > uridatadecode
+  data:...
+  ^D
+
+=cut

@@ -25,9 +25,8 @@ my @tz = (
     'Pacific/Auckland',
 );
 
-my $now = DateTime->now;
+my $dt = DateTime->now;
 for my $tz (@tz) {
-    $now->set_time_zone($tz);
-    print $now->ymd('/'), ' ', $now->hms(':'), " ", $tz, ($now->is_dst ? '*' : ''), "\n";
+    $dt->set_time_zone($tz);
+    print $dt->ymd('/'), ' ', $dt->hms(':'), " ", $tz, ($dt->is_dst ? '*' : ''), "\n";
 }
-

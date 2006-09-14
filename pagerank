@@ -1,13 +1,25 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-
+use Pod::Usage;
 use WWW::Google::PageRank;
 
-my $url = shift @ARGV or die "Usage: pagerank URL\n";
+my $url = shift @ARGV or pod2usage(1);
 unless ($url =~ m!^http!) {
     $url = "http://$url";
 }
 
 my $pr = WWW::Google::PageRank->new;
 print "Page Rank: ", scalar($pr->get($url)) || 0, "\n";
+
+__END__
+
+=head1 NAME
+
+pagerank - Extract PageRank from Google
+
+=head1 SYNOPSIS
+
+  pagerank URL
+
+=cut

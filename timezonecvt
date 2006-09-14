@@ -5,6 +5,7 @@ use DateTime;
 use DateTime::TimeZone;
 use Date::Manip;
 use Getopt::Long;
+use Pod::Usage;
 
 my $from = "America/Los_Angeles";
 my $to   = "Asia/Tokyo";
@@ -12,7 +13,7 @@ my $to   = "Asia/Tokyo";
 GetOptions('--from=s', \$from, '--to=s' => \$to);
 Getopt::Long::Configure("bundling");
 
-my $date = join ' ', @ARGV or die "Usage: timezonecvt [-f From] [-t To] date\n";
+my $date = join ' ', @ARGV or pod2usage(1);
 my @date = localtime(UnixDate(ParseDateString($date), "%s"));
 
 my $dt = DateTime->new(
@@ -33,3 +34,16 @@ print <<EOF;
 $from_date ($from)
 $to_date ($to)
 EOF
+
+__END__
+
+=head1 NAME
+
+timezonecvt - Convert timezone for given datetime
+
+=head1 SYNOPSIS
+
+  timezonecvt 9/12 13:45
+  timezonecvt -f Asia/Tokyo -t America/New_York tomorrow 3pm
+
+=cut

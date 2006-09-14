@@ -4,9 +4,11 @@ use warnings;
 use Getopt::Long;
 use Finance::Currency::Convert::Yahoo;
 use Number::Format;
+use Pod::Usage;
 
 my $to   = "JPY";
-GetOptions('--to=s', \$to);
+GetOptions('help|?' => \my $help, '--to=s', \$to);
+pod2usage(1) if $help;
 
 no warnings 'uninitialized';
 my $stuff = join ' ', @ARGV;
@@ -16,7 +18,7 @@ if ($quant =~ /^\w{3}$/ && $currency =~ /^[\d\,\.]+$/) {
 }
 
 if ($currency !~ /^\w{3}$/) {
-    die "Unknown currency: $currency\n";
+    pod2usage("Unknown currency: $currency\n");
 }
 
 $quant =~ tr/,//d;
@@ -30,3 +32,16 @@ print comma($quant), " $currency = ", comma($how), " $to\n";
 sub comma {
     Number::Format->new->format_number($_[0]);
 }
+
+__END__
+
+=head1 NAME
+
+currency - Convert currency from one to another
+
+=head1 SYNOPSIS
+
+  currency 100 USD
+  currency -t GBP 1000 THB
+
+=cut
