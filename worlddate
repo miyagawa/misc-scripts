@@ -28,8 +28,6 @@ my @tz = (
 my $now = DateTime->now;
 for my $tz (@tz) {
     $now->set_time_zone($tz);
-    my $date = $now->ymd('/') . ' ' . $now->hms(':');
-    my $is_dst = $now->is_dst ? '*' : '';
-    print "$date $tz$is_dst\n";
+    print $now->ymd('/'), ' ', $now->hms(':'), " ", $tz, ($now->is_dst ? '*' : ''), "\n";
 }
 
