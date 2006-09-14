@@ -19,5 +19,7 @@ if ($currency !~ /^\w{3}$/) {
 }
 
 $currency = uc($currency);
+$to       = uc($to);
+
 my $how = Finance::Currency::Convert::Yahoo::convert($quant, $currency, $to) or exit;
 print "$quant $currency = $how $to\n";
