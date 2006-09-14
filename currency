@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use Getopt::Long;
 use Finance::Currency::Convert::Yahoo;
+use Number::Format;
 
 my $to   = "JPY";
 GetOptions('--to=s', \$to);
@@ -24,4 +25,8 @@ $currency = uc($currency);
 $to       = uc($to);
 
 my $how = Finance::Currency::Convert::Yahoo::convert($quant, $currency, $to) or exit;
-print "$quant $currency = $how $to\n";
+print comma($quant), " $currency = ", comma($how), " $to\n";
+
+sub comma {
+    Number::Format->new->format_number($_[0]);
+}
