@@ -18,6 +18,8 @@ if ($currency !~ /^\w{3}$/) {
     die "Unknown currency: $currency\n";
 }
 
+$quant =~ tr/,//d;
+
 $currency = uc($currency);
 $to       = uc($to);
 
