@@ -18,7 +18,6 @@ if ($currency !~ /^\w{3}$/) {
     die "Unknown currency: $currency\n";
 }
 
-my $how = Finance::Currency::Convert::Yahoo::convert($quant, $currency, $to);
+$currency = uc($currency);
+my $how = Finance::Currency::Convert::Yahoo::convert($quant, $currency, $to) or exit;
 print "$quant $currency = $how $to\n";
-
-
