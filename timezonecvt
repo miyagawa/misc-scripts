@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use DateTime;
 use DateTime::TimeZone;
-use Date::Parse;
+use Date::Manip;
 use Getopt::Long;
 
 my $from = "America/Los_Angeles";
@@ -13,7 +13,7 @@ GetOptions('--from=s', \$from, '--to=s' => \$to);
 Getopt::Long::Configure("bundling");
 
 my $date = join ' ', @ARGV or die "Usage: timezonecvt [-f From] [-t To] date\n";
-my @date = strptime($date);
+my @date = localtime(UnixDate(ParseDateString($date), "%s"));
 
 my $dt = DateTime->new(
     second => $date[0],
@@ -21,7 +21,7 @@ my $dt = DateTime->new(
     hour   => $date[2],
     day    => $date[3],
     month  => $date[4] + 1,
-    year   => ($date[5] || (localtime)[5]) + 1900,
+    year   => $date[5] + 1900,
     time_zone => $from,
 );
 
