@@ -1,0 +1,24 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use Getopt::Long;
+use Finance::Currency::Convert::Yahoo;
+
+my $to   = "JPY";
+GetOptions('--to=s', \$to);
+
+no warnings 'uninitialized';
+my $stuff = join ' ', @ARGV;
+my($quant, $currency) = split /\s+/, $stuff;
+if ($quant =~ /^\w{3}$/ && $currency =~ /^[\d\,\.]+$/) {
+    ($quant, $currency) = ($currency, $quant);
+}
+
+if ($currency !~ /^\w{3}$/) {
+    die "Unknown currency: $currency\n";
+}
+
+my $how = Finance::Currency::Convert::Yahoo::convert($quant, $currency, $to);
+print "$quant $currency = $how $to\n";
+
+

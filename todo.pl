@@ -9,6 +9,7 @@ emulates the interface of Lifehacker.com's todo.sh script.
 
 =cut
 
+use Encode ();
 use YAML ();
 use LWP::UserAgent;
 use Number::RecordLocator;
@@ -31,7 +32,14 @@ $ua->cookie_jar({});
 # Load the user's proxy settings from %ENV
 $ua->env_proxy;
 
-binmode STDOUT, ":utf8";
+my $encoding;
+eval {
+    require Term::Encoding;
+    $encoding = Term::Encoding::get_encoding();
+};
+$encoding ||= "utf-8";
+
+binmode STDOUT, ":encoding($encoding)";
 
 main();
 
@@ -356,7 +364,7 @@ sub download_textfile {
                       format => 'sync');
 
     # perl automatically does TRT with $filename eq '-'
-    open (my $file, "> $filename") || die("Can't open file '$filename': $!");
+    open (my $file, ">:utf8", $filename) || die("Can't open file '$filename': $!");
 
     print $file $result->{_content}{result};
 }
@@ -427,7 +435,7 @@ sub call ($@) {
     );
 
     if ( $res->is_success ) {
-        return YAML::Load($res->content)->{fnord};
+        return YAML::Load( Encode::decode_utf8($res->content) )->{fnord};
     } else {
         die $res->status_line;
     }
