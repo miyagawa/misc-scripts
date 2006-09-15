@@ -26,14 +26,12 @@ my $dt = DateTime->new(
     time_zone => $from,
 );
 
-my $from_date = $dt->ymd('/') . ' ' . $dt->hms(':');
-$dt->set_time_zone($to);
-my $to_date   = $dt->ymd('/') . ' ' . $dt->hms(':');
+my $to_date = $dt->clone;
+$to_date->set_time_zone($to);
 
-print <<EOF;
-$from_date ($from)
-$to_date ($to)
-EOF
+for my $date ($dt, $to_date) {
+    print $date->strftime("%Y/%m/%d (%a) %H:%M:%S "), $date->time_zone->name, ($date->is_dst ? '*' : ''), "\n";
+}
 
 __END__
 

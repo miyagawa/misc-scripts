@@ -28,5 +28,5 @@ my @tz = (
 my $dt = DateTime->now;
 for my $tz (@tz) {
     $dt->set_time_zone($tz);
-    print $dt->ymd('/'), ' ', $dt->hms(':'), " ", $tz, ($dt->is_dst ? '*' : ''), "\n";
+    print $dt->strftime("%Y/%m/%d (%a) %H:%M:%S "), $dt->time_zone->name, ($dt->is_dst ? '*' : ''), "\n";
 }
