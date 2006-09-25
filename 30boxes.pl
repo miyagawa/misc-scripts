@@ -29,15 +29,6 @@ our $changed;
 
 $ua->env_proxy;
 
-my $encoding;
-eval {
-    require Term::Encoding;
-    $encoding = Term::Encoding::get_encoding();
-};
-$encoding ||= "utf-8";
-binmode STDOUT, ":encoding($encoding)";
-binmode STDIN, ":encoding($encoding)";
-
 main();
 
 END {
@@ -50,7 +41,20 @@ sub prompt {
     return $value;
 }
 
+sub setup_encoding {
+    my $encoding;
+    eval {
+        require Term::Encoding;
+        $encoding = Term::Encoding::get_encoding();
+    };
+    $encoding ||= "utf-8";
+    binmode STDOUT, ":encoding($encoding)";
+    binmode STDIN, ":encoding($encoding)";
+    @ARGV = decode($encoding, $_), @ARGV;
+}
+
 sub main {
+    setup_encoding();
     GetOptions(\%args,
                "start=s",
                "from=s",
