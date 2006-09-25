@@ -74,9 +74,10 @@ sub main {
 
     # map month to start/end
     if ($args{month}) {
-        $args{start} = parse_date($args{month});
-        my($year, $month, $day) = split /-/, $args{start};
+        my $target = parse_date($args{month});
+        my($year, $month, $day) = split /-/, $target;
         my $end = Date_DaysInMonth($month, $year);
+        $args{start} = "$year-$month-1";
         $args{end}   = "$year-$month-$end";
     }
 
@@ -134,7 +135,12 @@ sub list_events {
 
     my @events = @{ $res->{eventList}->{event} };
     for my $event (sort { $a->{start} cmp $b->{start} } @events) {
-        printf "%8s %s %s\n", $event->{id}, $event->{start}, $event->{summary};
+        my($date, $time) = split / /, $event->{start};
+        printf "%8s %s %s (%s)\n",
+            $event->{id},
+            $date,
+            $event->{summary},
+            ($event->{allDayEvent} ? 'All day' : $time),
     }
 }
 
@@ -172,7 +178,7 @@ sub call_api {
     );
 
     my $res  = $ua->get($url);
-    my $data = XML::Simple::XMLin($res->content, ForceArray => [ 'event' ], KeyAttr => undef);
+    my $data = XML::Simple::XMLin($res->content, ForceArray => [ 'event', 'tags' ], KeyAttr => undef);
     if ($data->{stat} ne 'ok') {
         die "call API failed. You might need to remove $conf to redo the authentication.";
     }
