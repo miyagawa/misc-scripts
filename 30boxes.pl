@@ -194,32 +194,32 @@ __END__
 
 =head1 NAME
 
-30boxes - a command-line interface to 30boxes
+30boxes.pl - a command-line interface to 30boxes
 
 =head1 SYNOPSIS
 
-  30boxes [options] list
-  30boxes add <text try of the event>
-  30boxes del <event-id>
+  30boxes.pl [options] list
+  30boxes.pl add <text try of the event>
+  30boxes.pl del <event-id>
 
     Options:
       --from, --start		Start date of events to search for
       --to, --end		End date of events to search for
       --month			Month of events to search for
 
-  30boxes list
+  30boxes.pl list
         List all events in your calendar, starting from today to 90 days later.
 
-  30boxes --from "2 weeks ago" --to today
+  30boxes.pl --from "2 weeks ago" --to today
         List all events in your calendar, starting from 2 weeks ago to today.
 
-  30boxes --month "2006 September"
+  30boxes.pl --month "2006 September"
         List all events in your calendar scheduled on September, 2006.
 
-  30boxes add Meeting with Bob tomorrow 3pm
+  30boxes.pl add Meeting with Bob tomorrow 3pm
         Add new event titled "Meeting with Bob" on 3pm tomorrow.
 
-  30boxes del 100
+  30boxes.pl del 100
         Deletes event with id 100.
 
 =cut
