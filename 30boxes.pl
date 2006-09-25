@@ -120,6 +120,7 @@ PROMPT
 
 sub save_config {
     YAML::DumpFile($conf, \%config);
+    chmod 0600, $conf;
 }
 
 sub dow {
