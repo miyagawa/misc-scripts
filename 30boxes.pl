@@ -57,6 +57,7 @@ sub main {
                "end=s",
                "to=s",
                "month=s",
+               "date=s",
                "help",
                "config=s")
         or pod2usage(2);
@@ -80,6 +81,8 @@ sub main {
         $args{start} = "$year-$month-1";
         $args{end}   = "$year-$month-$end";
     }
+
+    $args{date} = parse_date($args{date}) if $args{date};
 
     setup_config();
 
@@ -127,9 +130,14 @@ sub dow {
 }
 
 sub list_events {
-    my $res = call_api("events.Get",
-                       $args{start} ? (start => $args{start}) : (),
-                       $args{end}   ? (end => $args{end}) : ());
+    my %param;
+    $param{start} = $args{start} if $args{start};
+    $param{end}   = $args{end}   if $args{end};
+    if ($args{date}) {
+        $param{start} = $param{end} = $args{date};
+    }
+
+    my $res = call_api("events.Get", %param);
 
     unless ($res->{eventList}->{event}) {
         print "No event found.\n";
@@ -206,6 +214,7 @@ __END__
       --from, --start		Start date of events to search for
       --to, --end		End date of events to search for
       --month			Month of events to search for
+      --date                    Date of events to search for
 
   30boxes.pl list
         List all events in your calendar, starting from today to 90 days later.
