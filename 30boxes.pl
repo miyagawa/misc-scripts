@@ -225,6 +225,9 @@ __END__
   30boxes.pl --month "2006 September"
         List all events in your calendar scheduled on September, 2006.
 
+  30boxes.pl --date tomorrow
+        List all events in your calendar tomorrow.
+
   30boxes.pl add Meeting with Bob tomorrow 3pm
         Add new event titled "Meeting with Bob" on 3pm tomorrow.
 
