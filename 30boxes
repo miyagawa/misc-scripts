@@ -12,6 +12,8 @@ like Lifehacker.com's todo.sh script.
 use Date::Manip;
 use Encode;
 use ExtUtils::MakeMaker ();
+use File::HomeDir;
+use File::Spec;
 use Getopt::Long;
 use YAML;
 use LWP::UserAgent;
@@ -19,7 +21,7 @@ use Pod::Usage;
 use URI;
 use XML::Simple;
 
-our $conf = "$ENV{HOME}/.30boxes";
+our $conf = File::Spec->catfile(File::HomeDir->my_home, ".30boxes");
 our $ua = LWP::UserAgent->new;
 our %config = ();
 our %args   = ();
