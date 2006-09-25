@@ -119,8 +119,11 @@ sub save_config {
     YAML::DumpFile($conf, \%config);
 }
 
-sub check_stat {
-    my $res = shift;
+sub dow {
+    my @dow  = qw(Sun Mon Tue Wed Thu Fri Sat);
+    my $date = shift;
+    my($y, $m, $d) = split /-/, $date;
+    return $dow[ Date_DayOfWeek($m, $d, $y) ];
 }
 
 sub list_events {
@@ -136,9 +139,10 @@ sub list_events {
     my @events = @{ $res->{eventList}->{event} };
     for my $event (sort { $a->{start} cmp $b->{start} } @events) {
         my($date, $time) = split / /, $event->{start};
-        printf "%8s %s %s (%s)\n",
+        printf "%8s %s (%s) %s (%s)\n",
             $event->{id},
             $date,
+            dow($date),
             $event->{summary},
             ($event->{allDayEvent} ? 'All day' : $time),
     }
