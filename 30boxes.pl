@@ -197,7 +197,11 @@ sub call_api {
     my $res  = $ua->get($url);
     my $data = XML::Simple::XMLin($res->content, ForceArray => [ 'event', 'tags' ], KeyAttr => undef);
     if ($data->{stat} ne 'ok') {
-        die "call API failed. You might need to remove $conf to redo the authentication.";
+        my $msg = "call API failed: $data->{err}->{msg} ($data->{err}->{code})\n";
+        if ($data->{err}->{code} == 2 || $data->{err}->{code} == 5) {
+            $msg .= "You might need to remove $conf to authenticate again.\n";
+        }
+        die $msg;
     }
 
     return $data;
