@@ -85,7 +85,9 @@ sub main {
 }
 
 sub parse_date {
-    my @date = localtime(UnixDate(ParseDateString(shift), "%s"));
+    my $time = UnixDate(ParseDateString($_[0]), "%s") or die "Can't parse '$_[0]' as a date string\n";
+    my @date = localtime($time);
+
     return join '-', $date[5] + 1900, $date[4] + 1, $date[3];
 }
 
@@ -113,6 +115,11 @@ sub list_events {
     my $res = call_api("events.Get",
                        $args{start} ? (start => $args{start}) : (),
                        $args{end}   ? (end => $args{end}) : ());
+
+    unless ($res->{eventList}->{event}) {
+        print "No event found.\n";
+        exit;
+    }
 
     my @events = @{ $res->{eventList}->{event} };
     for my $event (sort { $a->{start} cmp $b->{start} } @events) {
