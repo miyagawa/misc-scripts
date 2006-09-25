@@ -208,7 +208,7 @@ __END__
 =head1 SYNOPSIS
 
   30boxes.pl [options] list
-  30boxes.pl add <text try of the event>
+  30boxes.pl add <summary of the event>
   30boxes.pl del <event-id>
 
     Options:
