@@ -56,6 +56,7 @@ sub main {
                "from=s",
                "end=s",
                "to=s",
+               "month=s",
                "help",
                "config=s")
         or pod2usage(2);
@@ -70,6 +71,14 @@ sub main {
     # Human readable one
     $args{start} = parse_date($args{start}) if $args{start};
     $args{end}   = parse_date($args{end})   if $args{end};
+
+    # map month to start/end
+    if ($args{month}) {
+        $args{start} = parse_date($args{month});
+        my($year, $month, $day) = split /-/, $args{start};
+        my $end = Date_DaysInMonth($month, $year);
+        $args{end}   = "$year-$month-$end";
+    }
 
     setup_config();
 
@@ -183,11 +192,19 @@ __END__
   30boxes add <text try of the event>
   30boxes del <event-id>
 
+    Options:
+      --from, --start		Start date of events to search for
+      --to, --end		End date of events to search for
+      --month			Month of events to search for
+
   30boxes list
         List all events in your calendar, starting from today to 90 days later.
 
   30boxes --from "2 weeks ago" --to today
         List all events in your calendar, starting from 2 weeks ago to today.
+
+  30boxes --month "2006 September"
+        List all events in your calendar scheduled on September, 2006.
 
   30boxes add Meeting with Bob tomorrow 3pm
         Add new event titled "Meeting with Bob" on 3pm tomorrow.
