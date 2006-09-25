@@ -50,7 +50,7 @@ sub setup_encoding {
     $encoding ||= "utf-8";
     binmode STDOUT, ":encoding($encoding)";
     binmode STDIN, ":encoding($encoding)";
-    @ARGV = decode($encoding, $_), @ARGV;
+    @ARGV = map decode($encoding, $_), @ARGV;
 }
 
 sub main {
