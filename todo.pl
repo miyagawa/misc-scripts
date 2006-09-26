@@ -273,7 +273,7 @@ sub tag_task {
     my @tags = @ARGV;
 
     my $tasks = download_tasks("id/$task");
-    my $tags = $tasks->[0]{tags};
+    my $tags = $tasks->[0]{tags} || '';
 
     my $result = call(UpdateTask =>
                       id      => $task,
