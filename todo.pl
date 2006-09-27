@@ -254,7 +254,7 @@ sub add_task {
     $task{summary} = $summary;
 
     my $result = call(CreateTask => %task);
-    result_ok($result, "Created task");
+    result_ok($result, sub { "Created task " . $locator->encode($result->{_content}->{id}) });
 }
 
 sub edit_task {
@@ -444,7 +444,8 @@ sub call ($@) {
 =head2 result_ok RESULT, MESSAGE
 
 Make sure that a result returned by C<call> indicates success. If so,
-print MESSAGE. Otherwise, die with a descriptive error.
+print MESSAGE. If MESSAGE is a subroutine reference, execute it to get
+the message. Otherwise, die with a descriptive error.
 
 =cut
 
@@ -453,7 +454,7 @@ sub result_ok {
     my $message = shift;
 
     if(!$result->{failure}) {
-        print "$message\n";
+        print ref($message) ? $message->() . "\n" : "$message\n";
     } else {
         die(YAML::Dump($result));
     }
