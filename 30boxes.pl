@@ -128,10 +128,10 @@ sub save_config {
 }
 
 sub dow {
-    my @dow  = qw(Sun Mon Tue Wed Thu Fri Sat);
+    my @dow  = qw(Mon Tue Wed Thu Fri Sat Sun);
     my $date = shift;
     my($y, $m, $d) = split /-/, $date;
-    return $dow[ Date_DayOfWeek($m, $d, $y) ];
+    return $dow[ Date_DayOfWeek($m, $d, $y) - 1 ];
 }
 
 sub list_events {
