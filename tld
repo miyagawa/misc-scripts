@@ -1,0 +1,7 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use Net::Domain::TLD;
+
+my $tld = shift;
+print Net::Domain::TLD::tlds->{$tld} || "$tld not found.", "\n";
