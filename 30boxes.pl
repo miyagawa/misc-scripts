@@ -152,7 +152,7 @@ sub list_events {
     my @events = @{ $res->{eventList}->{event} };
     for my $event (sort { $a->{start} cmp $b->{start} } @events) {
         my($date, $time) = split / /, $event->{start};
-        printf "%8s %s (%s) %s (%s)\n",
+        printf "%7s %s (%s) %s (%s)\n",
             $event->{id},
             $date,
             dow($date),
