@@ -1,0 +1,10 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use encoding "utf-8";
+use Encode;
+
+while (<>) {
+    print encode("ASCII", $_, Encode::FB_PERLQQ);
+}
+
