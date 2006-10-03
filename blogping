@@ -5,6 +5,7 @@ use XMLRPC::Lite;
 use YAML;
 
 my @ping = (
+    'http://ping.feedburner.com/',
     'http://www.bloglines.com/ping',
     'http://rpc.technorati.jp/rpc/ping',
     'http://rpc.reader.livedoor.com/ping',
