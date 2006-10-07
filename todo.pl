@@ -10,7 +10,7 @@ emulates the interface of Lifehacker.com's todo.sh script.
 =cut
 
 use Encode ();
-use YAML ();
+use YAML::Syck ();
 use LWP::UserAgent;
 use Number::RecordLocator;
 use Getopt::Long;
@@ -130,7 +130,7 @@ sub check_config_perms {
 
 sub load_config {
     return unless(-e $CONFFILE);
-    %config = %{YAML::LoadFile($CONFFILE) || {}};
+    %config = %{YAML::Syck::LoadFile($CONFFILE) || {}};
     my $sid = $config{sid};
     if($sid) {
         my $uri = URI->new($config{site});
@@ -185,7 +185,7 @@ END_WELCOME
 }
 
 sub save_config {
-    YAML::DumpFile($CONFFILE, \%config);
+    YAML::Syck::DumpFile($CONFFILE, \%config);
     chmod 0600, $CONFFILE;
 }
 
@@ -419,7 +419,7 @@ sub download_tasks {
     my $result = call(DownloadTasks =>
                       query  => $query,
                       format => 'yaml');
-    return YAML::Load($result->{_content}{result});
+    return YAML::Syck::Load($result->{_content}{result});
 }
 
 sub call ($@) {
@@ -435,7 +435,7 @@ sub call ($@) {
     );
 
     if ( $res->is_success ) {
-        return YAML::Load( Encode::decode_utf8($res->content) )->{fnord};
+        return YAML::Syck::Load( Encode::decode_utf8($res->content) )->{fnord};
     } else {
         die $res->status_line;
     }
@@ -456,7 +456,7 @@ sub result_ok {
     if(!$result->{failure}) {
         print ref($message) ? $message->() . "\n" : "$message\n";
     } else {
-        die(YAML::Dump($result));
+        die(YAML::Syck::Dump($result));
     }
     
 }
