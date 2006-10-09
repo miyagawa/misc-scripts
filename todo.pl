@@ -18,6 +18,9 @@ use Pod::Usage;
 use Email::Address;
 use Fcntl qw(:mode);
 
+no warnings 'once';
+$YAML::Syck::ImplicitUnicode = 1;
+
 our $CONFFILE = "$ENV{HOME}/.hiveminder";
 our %config = ();
 our $ua = LWP::UserAgent->new;
@@ -208,7 +211,7 @@ sub list_tasks {
     $query .= "/owner/$args{owner}";
 
     my $tasks = download_tasks($query);
-    
+
     for my $t (@$tasks) {
         printf "%4s ", $locator->encode($t->{id});
         print '(' . priority_to_string($t->{priority}) . ') ' if $t->{priority} != 3;
@@ -435,7 +438,7 @@ sub call ($@) {
     );
 
     if ( $res->is_success ) {
-        return YAML::Syck::Load( Encode::decode_utf8($res->content) )->{fnord};
+        return YAML::Syck::Load($res->content)->{fnord};
     } else {
         die $res->status_line;
     }
