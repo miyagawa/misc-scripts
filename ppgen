@@ -1,0 +1,5 @@
+#!/usr/bin/perl
+use strict;
+use Text::Password::Pronounceable;
+
+print Text::Password::Pronounceable->generate(6,10), "\n";
