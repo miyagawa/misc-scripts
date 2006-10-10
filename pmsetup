@@ -58,10 +58,6 @@ sub write_plugin_files {
     !system 'make test' or die $?;
     !system 'make manifest' or die $?;
     !system 'make distclean' or die $?;
-    !system "svk import -m 'import $dist' //scratch/$dist" or die $?;
-    chdir "..";
-    rmtree $dist, 1;
-    !system "svk co //scratch/$dist" or die $?;
 }
 
 sub write_file {
