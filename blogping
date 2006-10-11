@@ -9,12 +9,14 @@ my @ping = (
     'http://www.bloglines.com/ping',
     'http://rpc.technorati.jp/rpc/ping',
     'http://rpc.reader.livedoor.com/ping',
+    'http://blogsearch.google.com/ping/RPC2',
 );
 
 my $blog_url  = shift || "http://blog.bulknews.net/mt/";
 my $blog_name = shift || "blog.bulknews.net";
 
 for my $ping (@ping) {
+    warn "pinging $ping\n";
     my $result = XMLRPC::Lite->proxy($ping)->call("weblogUpdates.ping", $blog_name, $blog_url)->result;
     warn YAML::Dump $result;
 }
