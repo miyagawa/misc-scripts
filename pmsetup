@@ -92,6 +92,7 @@ template: |
   all_from 'lib/[% path %]';
 
   build_requires 'Test::More';
+  use_test_base;
   auto_include;
   WriteAll;
 
@@ -102,6 +103,25 @@ template: |
   use Test::More tests => 1;
 
   BEGIN { use_ok '[% module %]' }
+---
+file: t/97_podspell.t
+template: |
+  use Test::More;
+  eval q{ use Test::Spelling };
+  plan skip_all => "Test::Spelling is not installed." if $@;
+  add_stopwords(<DATA>);
+  all_pod_files_spelling_ok('lib');
+  __DATA__
+  Tatsuhiko
+  Miyagawa
+---
+file: t/98_perlcritic.t
+template: |
+  use strict;
+  use Test::More;
+  eval q{ use Test::Perl::Critic };
+  plan skip_all => "Test::Perl::Critic is not installed." if $@;
+  all_critic_ok("lib");
 ---
 file: t/99_pod.t
 template: |
@@ -165,6 +185,7 @@ template: |
   ^MakeMaker-\d
   \.gz$
   \.cvsignore
+  9.*-pod.*.t
 ---
 file: README
 template: |
