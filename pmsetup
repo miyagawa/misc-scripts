@@ -185,7 +185,7 @@ template: |
   ^MakeMaker-\d
   \.gz$
   \.cvsignore
-  9.*-pod.*.t
+  9.*\.t
 ---
 file: README
 template: |
