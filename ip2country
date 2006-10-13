@@ -1,0 +1,9 @@
+#!/usr/bin/perl
+use strict;
+use IP::Country::Fast;
+
+my $ip = $ARGV[0] or die "Usage: ip2country [IP|hostname]\n";
+
+my $reg = IP::Country::Fast->new();
+print $reg->inet_atocc($ARGV[0]) . "\n";
+
