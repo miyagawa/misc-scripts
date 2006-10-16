@@ -68,8 +68,6 @@ sub main {
     $conf = $args{config} if $args{config};
     pod2usage(0) if $args{help};
 
-    setup_config();
-
     my %commands = (
         update => \&update_graphs,
         setup  => sub { setup_config(1) },
@@ -77,6 +75,8 @@ sub main {
     );
 
     my $command = shift @ARGV || ($changed ? 'null' : 'update');
+    setup_config() unless $command eq 'setup';
+
     $commands{$command} or pod2usage(-message => "Unknown command: $command", -exitval => 2);
     $commands{$command}->();
 }
@@ -112,6 +112,7 @@ sub update_graphs {
             value     => $value,
         });
         warn $res->content unless $res->code == 201;
+        warn "Data posted.\n"  if $res->code == 201;
     }
 }
 
