@@ -100,7 +100,7 @@ sub save_config {
 }
 
 sub update_graphs {
-    $args{date} ||= DateTime->now->ymd;
+    $args{date} ||= DateTime->now(time_zone => 'local')->ymd;
     for my $graph (split /,\s*/, $config{graphs}) {
         utf8::decode($graph);
         my $value = ExtUtils::MakeMaker::prompt("$graph on $args{date}:");
