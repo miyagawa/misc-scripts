@@ -1,8 +1,11 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
+use ExtUtils::MakeMaker;
 use XMLRPC::Lite;
 use YAML;
+
+my $conf = "$ENV{HOME}/.blogping";
 
 my @ping = (
     'http://ping.feedburner.com/',
@@ -12,11 +15,38 @@ my @ping = (
     'http://blogsearch.google.com/ping/RPC2',
 );
 
-my $blog_url  = shift || "http://blog.bulknews.net/mt/";
-my $blog_name = shift || "blog.bulknews.net";
+our $changed;
+our $config = eval { YAML::LoadFile($conf) || {} };
+setup_default() unless $config->{default};
+
+my $name = $ARGV[0] || $config->{default};
+my $site = $config->{$name} || setup_site($name);
+
+use XXX;
+XXX $site;
 
 for my $ping (@ping) {
     warn "pinging $ping\n";
-    my $result = XMLRPC::Lite->proxy($ping)->call("weblogUpdates.ping", $blog_name, $blog_url)->result;
+    my $result = XMLRPC::Lite->proxy($ping)->call("weblogUpdates.ping", $site->{name}, $site->{url})->result;
     warn YAML::Dump $result;
+}
+
+END {
+    YAML::DumpFile($conf, $config) if $changed;
+}
+
+sub setup_default {
+    warn "Setting up the default site.\n";
+    $config->{default} = my $name = prompt("Short name:");
+    setup_site($name);
+}
+
+sub setup_site {
+    my $name = shift;
+    warn "Setting up config for site '$name'\n";
+    my $site;
+    $site->{name} = prompt("Blog name:");
+    $site->{url}  = prompt("Blog url:");
+    $changed++;
+    return $config->{$name} = $site;
 }
