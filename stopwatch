@@ -1,0 +1,13 @@
+#!/usr/bin/perl
+use strict;
+use Time::HiRes qw( gettimeofday usleep );
+
+$| = 1;
+
+my $start = gettimeofday;
+while (1) {
+    my $time = gettimeofday - $start;
+    printf "%.2f\r", $time;
+    usleep 0.01;
+}
+
