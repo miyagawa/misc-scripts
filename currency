@@ -13,8 +13,9 @@ pod2usage(1) if $help;
 no warnings 'uninitialized';
 my $stuff = join ' ', @ARGV;
 my($quant, $currency) = split /\s+/, $stuff;
-if ($quant =~ /^\w{3}$/ && $currency =~ /^[\d\,\.]+$/) {
+if ($quant =~ /^\w{3}$/ && $currency =~ /^[\d\,\.]*$/) {
     ($quant, $currency) = ($currency, $quant);
+    $quant ||= 1;
 }
 
 if ($currency !~ /^\w{3}$/) {
