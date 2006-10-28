@@ -1,5 +1,6 @@
 #!/usr/bin/perl
 use strict;
+use POSIX;
 use Time::HiRes qw( gettimeofday usleep );
 
 $| = 1;
@@ -7,7 +8,24 @@ $| = 1;
 my $start = gettimeofday;
 while (1) {
     my $time = gettimeofday - $start;
-    printf "%.2f\r", $time;
+    my($hour, $min, $sec, $ss) = hms($time);
+    printf "%d:%02d:%02d%s\r", $hour, $min, $sec, $ss;
     usleep 0.01;
 }
+
+sub hms {
+    my $sec = shift;
+
+    my($hour, $min, $ss);
+    $min  = POSIX::floor($sec / 60);
+    $sec  = $sec - $min * 60; # don't use %
+    $hour = $min / 60;
+    $min  = $min % 60;
+    my $tmp = $sec;
+    $sec  = POSIX::floor($sec);
+    $ss   = substr(sprintf('%.02f', $tmp - $sec), 1);
+
+    return ($hour, $min, $sec, $ss);
+}
+
 
