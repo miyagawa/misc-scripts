@@ -22,9 +22,6 @@ setup_default() unless $config->{default};
 my $name = $ARGV[0] || $config->{default};
 my $site = $config->{$name} || setup_site($name);
 
-use XXX;
-XXX $site;
-
 for my $ping (@ping) {
     warn "pinging $ping\n";
     my $result = XMLRPC::Lite->proxy($ping)->call("weblogUpdates.ping", $site->{name}, $site->{url})->result;
