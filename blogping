@@ -19,6 +19,17 @@ our $changed;
 our $config = eval { YAML::LoadFile($conf) || {} };
 setup_default() unless $config->{default};
 
+if (@ARGV and ($ARGV[0] eq '--list' || $ARGV[0] eq '-l')) {
+    my $default = $config->{default};
+    for my $name (keys %$config) {
+        next if $name eq 'default';
+        my $site = $config->{$name};
+        $name .= '*' if $name eq $default;
+        print $name, " " x (16-length($name)), "$site->{name} ($site->{url})\n";
+    }
+    exit;
+}
+
 my $name = $ARGV[0] || $config->{default};
 my $site = $config->{$name} || setup_site($name);
 
