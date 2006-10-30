@@ -6,9 +6,12 @@ use Finance::Currency::Convert::Yahoo;
 use Number::Format;
 use Pod::Usage;
 
+my $from;
 my $to   = "JPY";
-GetOptions('help|?' => \my $help, '--to=s', \$to);
+GetOptions('help|?' => \my $help, '--to=s', \$to, '--from=s', \$from);
 pod2usage(1) if $help;
+
+push @ARGV, $from if $from; # --from JPY 100 = 100 JPY
 
 no warnings 'uninitialized';
 my $stuff = join ' ', @ARGV;
