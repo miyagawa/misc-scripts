@@ -1,0 +1,15 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+use DateTime;
+use Date::Japanese::Era;
+binmode STDOUT, ":utf8";
+
+my $dt = @ARGV
+    ? DateTime->new(year => $ARGV[0], month => 1, day => 1)
+    : DateTime->now;
+
+my $era = Date::Japanese::Era->new($dt->year, $dt->month, $dt->day);
+
+print $era->name, $era->year, "\n";
