@@ -30,6 +30,10 @@ $quant =~ tr/,//d;
 $currency = uc($currency);
 $to       = uc($to);
 
+if ($currency eq $to && $currency eq 'JPY') {
+    $to = "USD";
+}
+
 my $how = Finance::Currency::Convert::Yahoo::convert($quant, $currency, $to) or exit;
 print comma($quant), " $currency = ", comma($how), " $to\n";
 
