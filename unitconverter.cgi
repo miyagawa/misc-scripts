@@ -88,11 +88,11 @@ sub convert_pound_oz {
 }
 
 sub convert_g_pound {
-    return $_[0] / 0.00045359237;
+    return $_[0] / 453.59237;
 }
 
 sub convert_pound_g {
-    return $_[0] * 0.00045359237;
+    return $_[0] * 453.59237;
 }
 
 sub convert_sqf_sqm {
