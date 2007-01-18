@@ -33,7 +33,7 @@ sub do_convert {
     no strict 'refs';
     my $value = eval { $func->(validate_number($query->param('value'))) };
     if ($@) {
-        print $query->header, "ERR: Can't do $from to $to conversion";
+        print $query->header, "ERR: Can't do $from to $to conversion: $@";
         return;
     }
 
@@ -64,11 +64,11 @@ sub convert_jpy_usd {
 }
 
 sub convert_inch_meter {
-    return 0.254 * $_[0];
+    return 0.0254 * $_[0];
 }
 
 sub convert_meter_inch {
-    return $_[0] / 0.254;
+    return $_[0] / 0.0254;
 }
 
 sub convert_inch_feet {
