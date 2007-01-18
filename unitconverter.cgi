@@ -132,11 +132,11 @@ h2 { font-size: 1.6em }
 [% prototype.define_javascript_functions %]
 <script>
 var url = "[% cgi.url %]";
-function doConvert(input, from, to, unit) {
+function doConvert(from, to, unit) {
   var spinner = unit + "-spinner";
   $(to).value = ''; // clear
   $(spinner).innerHTML = "<img src=\"[% cgi.url %]?spinner=1\" style=\"vertical-align:middle\" />";
-  var query = "value=" + encodeURIComponent(input.value) + "&from=" + from + "&to=" + to;
+  var query = "value=" + encodeURIComponent($(from).value) + "&from=" + from + "&to=" + to;
   new Ajax.Request(
     url,
     { method: 'get',
@@ -151,31 +151,31 @@ function doConvert(input, from, to, unit) {
 
 <h2>Currency</h2>
 <p>
-<input type="text" size="12" id="usd" onchange="doConvert(this, 'usd', 'jpy', 'currency')" /> USD =
-<input type="text" size="12" id="jpy" onchange="doConvert(this, 'jpy', 'usd', 'currency')" /> JPY
+<input type="text" size="12" id="usd" onchange="doConvert('usd', 'jpy', 'currency')" /> USD =
+<input type="text" size="12" id="jpy" onchange="doConvert('jpy', 'usd', 'currency')" /> JPY
 <span id="currency-spinner"></span>
 </p>
 
 <h2>Length</h2>
 <p>
-<input type="text" size="12" id="feet" onchange="doConvert(this, 'feet', 'inch', 'length');doConvert(this, 'inch', 'meter', 'length')" /> feet =
-<input type="text" size="12" id="inch" onchange="doConvert(this, 'inch', 'meter', 'length');doConvert(this, 'inch', 'feet', 'length')" /> inches =
-<input type="text" size="12" id="meter" onchange="doConvert(this, 'meter', 'inch', 'length');doConvert(this, 'inch', 'feet', 'length')" /> meters
+<input type="text" size="12" id="feet" onchange="doConvert('feet', 'inch', 'length');doConvert('inch', 'meter', 'length')" /> feet =
+<input type="text" size="12" id="inch" onchange="doConvert('inch', 'meter', 'length');doConvert('inch', 'feet', 'length')" /> inches =
+<input type="text" size="12" id="meter" onchange="doConvert('meter', 'inch', 'length');doConvert('inch', 'feet', 'length')" /> meters
 <span id="length-spinner"></span>
 </p>
 
 <h2>Weight</h2>
 <p>
-<input type="text" size="12" id="pound" onchange="doConvert(this, 'pound', 'oz', 'weight');doConvert(this, 'pound', 'g', 'weight')" /> pounds =
-<input type="text" size="12" id="oz" onchange="doConvert(this, 'oz', 'pound', 'weight');doConvert(this, 'pound', 'g', 'weight')" /> oz =
-<input type="text" size="12" id="g" onchange="doConvert(this, 'g', 'pound', 'weight');doConvert(this, 'pound', 'oz', 'weight')" /> g
+<input type="text" size="12" id="pound" onchange="doConvert('pound', 'oz', 'weight');doConvert('pound', 'g', 'weight')" /> pounds =
+<input type="text" size="12" id="oz" onchange="doConvert('oz', 'pound', 'weight');doConvert('pound', 'g', 'weight')" /> oz =
+<input type="text" size="12" id="g" onchange="doConvert('g', 'pound', 'weight');doConvert('pound', 'oz', 'weight')" /> g
 <span id="weight-spinner"></span>
 </p>
 
 <h2>Dimensions</h2>
 <p>
-<input type="text" size="12" id="sqf" onchange="doConvert(this, 'sqf', 'sqm', 'dimensions')" /> square feet =
-<input type="text" size="12" id="sqm" onchange="doConvert(this, 'sqm', 'sqf', 'dimensions')" /> m<sup>2</sup>
+<input type="text" size="12" id="sqf" onchange="doConvert('sqf', 'sqm', 'dimensions')" /> square feet =
+<input type="text" size="12" id="sqm" onchange="doConvert('sqm', 'sqf', 'dimensions')" /> m<sup>2</sup>
 <span id="dimensions-spinner"></span>
 </p>
 
