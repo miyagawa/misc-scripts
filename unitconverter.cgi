@@ -172,7 +172,7 @@ function doConvert(from, to, unit) {
 
 <h2>Weight</h2>
 <p>
-<input type="text" size="12" id="pound" onchange="doConvert('pound', 'oz', 'weight');doConvert('pound', 'g', 'weight')" /> pounds =
+<input type="text" size="12" id="pound" onchange="doConvert('pound', 'oz', 'weight');doConvert('pound', 'g', 'weight')" /> lb =
 <input type="text" size="12" id="oz" onchange="doConvert('oz', 'pound', 'weight');doConvert('oz', 'g', 'weight')" /> oz =
 <input type="text" size="12" id="g" onchange="doConvert('g', 'pound', 'weight');doConvert('g', 'oz', 'weight')" /> g
 <span id="weight-spinner"></span>
