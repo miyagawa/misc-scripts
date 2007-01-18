@@ -79,6 +79,9 @@ sub convert_feet_inch {
     return $_[0] * 12;
 }
 
+sub convert_feet_meter { convert_meter_inch(convert_feet_inch($_[0])) }
+sub convert_meter_feet { convert_inch_feet(convert_meter_inch($_[0])) }
+
 sub convert_oz_pound {
     return $_[0] / 16;
 }
@@ -94,6 +97,9 @@ sub convert_g_pound {
 sub convert_pound_g {
     return $_[0] * 453.59237;
 }
+
+sub convert_oz_g { convert_pound_g(convert_oz_pound($_[0])) }
+sub convert_g_oz { convert_pound_oz(convert_g_pound($_[0])) }
 
 sub convert_sqf_sqm {
     return $_[0] * 0.09290304;
@@ -158,17 +164,17 @@ function doConvert(from, to, unit) {
 
 <h2>Length</h2>
 <p>
-<input type="text" size="12" id="feet" onchange="doConvert('feet', 'inch', 'length');doConvert('inch', 'meter', 'length')" /> feet =
+<input type="text" size="12" id="feet" onchange="doConvert('feet', 'inch', 'length');doConvert('feet', 'meter', 'length')" /> feet =
 <input type="text" size="12" id="inch" onchange="doConvert('inch', 'meter', 'length');doConvert('inch', 'feet', 'length')" /> inches =
-<input type="text" size="12" id="meter" onchange="doConvert('meter', 'inch', 'length');doConvert('inch', 'feet', 'length')" /> meters
+<input type="text" size="12" id="meter" onchange="doConvert('meter', 'inch', 'length');doConvert('meter', 'feet', 'length')" /> meters
 <span id="length-spinner"></span>
 </p>
 
 <h2>Weight</h2>
 <p>
 <input type="text" size="12" id="pound" onchange="doConvert('pound', 'oz', 'weight');doConvert('pound', 'g', 'weight')" /> pounds =
-<input type="text" size="12" id="oz" onchange="doConvert('oz', 'pound', 'weight');doConvert('pound', 'g', 'weight')" /> oz =
-<input type="text" size="12" id="g" onchange="doConvert('g', 'pound', 'weight');doConvert('pound', 'oz', 'weight')" /> g
+<input type="text" size="12" id="oz" onchange="doConvert('oz', 'pound', 'weight');doConvert('oz', 'g', 'weight')" /> oz =
+<input type="text" size="12" id="g" onchange="doConvert('g', 'pound', 'weight');doConvert('g', 'oz', 'weight')" /> g
 <span id="weight-spinner"></span>
 </p>
 
