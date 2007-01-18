@@ -79,7 +79,7 @@ sub convert_feet_inch {
     return $_[0] * 12;
 }
 
-sub convert_feet_meter { convert_meter_inch(convert_feet_inch($_[0])) }
+sub convert_feet_meter { convert_inch_meter(convert_feet_inch($_[0])) }
 sub convert_meter_feet { convert_inch_feet(convert_meter_inch($_[0])) }
 
 sub convert_oz_pound {
