@@ -185,7 +185,7 @@ template: |
   ^MakeMaker-\d
   \.gz$
   \.cvsignore
-  ^9\d_.*\.t
+  ^t/9\d_.*\.t
 ---
 file: README
 template: |
