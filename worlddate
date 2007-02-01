@@ -12,18 +12,9 @@ my @tz = (
     'America/Chicago',
     'America/New_York',
     'Europe/London',
-    'Europe/Paris',
-    'Europe/Berlin',
-    'Europe/Rome',
-    'Europe/Madrid',
-    'Asia/Jakarta',
-    'Asia/Bangkok',
     'Asia/Taipei',
-    'Asia/Shanghai',
-    'Asia/Hong_Kong',
     [ 'Asia/Tokyo' ],
     'Australia/Sydney',
-    'Pacific/Auckland',
 );
 
 my $dt = DateTime->now;
@@ -35,6 +26,12 @@ for my $tz (@tz) {
     }
     $dt->set_time_zone($tz);
     print color 'yellow' if $color;
-    print $dt->strftime("%Y/%m/%d (%a) %H:%M:%S "), $dt->time_zone->name, ($dt->is_dst ? '*' : ''), "\n";
+
+    my $offset = $dt->time_zone->offset_for_datetime($dt);
+    print $dt->strftime("%Y/%m/%d (%a) %H:%M:%S "),
+        $dt->time_zone->name,
+        " (", $dt->time_zone->offset_as_string($offset),
+        ($dt->is_dst ? '*' : ''),
+        ")\n";
     print color 'reset' if $color;
 }
