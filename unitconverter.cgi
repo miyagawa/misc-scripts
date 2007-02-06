@@ -109,6 +109,14 @@ sub convert_sqm_sqf {
     return $_[0] / 0.09290304;
 }
 
+sub convert_celsius_fahrenheit {
+    (9 / 5) * $_[0] + 32;
+}
+
+sub convert_fahrenheit_celsius {
+    (5 / 9) * ($_[0] - 32);
+}
+
 sub show_form {
     my $query = shift;
 
@@ -184,6 +192,14 @@ function doConvert(from, to, unit) {
 <input type="text" size="12" id="sqm" onchange="doConvert('sqm', 'sqf', 'dimensions')" /> m<sup>2</sup>
 <span id="dimensions-spinner"></span>
 </p>
+
+<h2>Temperature</h2>
+<p>
+<input type="text" size="12" id="fahrenheit" onchange="doConvert('fahrenheit', 'celsius', 'temperature')" /> °F = 
+<input type="text" size="12" id="celsius" onchange="doConvert('celsius', 'fahrenheit', 'temperature')" /> °C
+<span id="temperature-spinner"></span>
+</p>
+
 
 
 TEMPLATE
