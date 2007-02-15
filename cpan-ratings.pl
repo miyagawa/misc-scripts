@@ -20,7 +20,7 @@ for my $dist (@dist) {
     next if $@;
 
     for my $item (@{$rss->items}) {
-        my $star = ($item->{description} =~ /Rating: (\d) star/)[0];
+        my $star = ($item->{description} =~ /Rating: (\d) star/)[0] || 0;
         print( ("*") x $star, (" ") x (5 - $star), " by ", $item->{dc}->{creator}, "\n" );
     }
 
