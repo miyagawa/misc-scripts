@@ -185,6 +185,7 @@ template: |
   ^MakeMaker-\d
   \.gz$
   \.cvsignore
+  \.shipit
   ^t/9\d_.*\.t
 ---
 file: README
@@ -216,3 +217,7 @@ template: |
   to read the documentation online with your favorite pager.
 
   [% config.author %]
+---
+file: .shipit
+template: |
+  steps = FindVersion, ChangeVersion, CheckChangeLog, DistTest, Commit, Tag, MakeDist, UploadCPAN
