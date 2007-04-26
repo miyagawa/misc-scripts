@@ -134,7 +134,7 @@ file: Changes
 template: |
   Revision history for Perl extension [% module %]
 
-    0.01  [% localtime %]
+  0.01  [% localtime %]
           - original version
 ---
 file: lib/$path
