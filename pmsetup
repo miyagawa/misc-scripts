@@ -142,6 +142,7 @@ template: |
   package [% module %];
 
   use strict;
+  use 5.8.1;
   our $VERSION = '0.01';
 
   1;
