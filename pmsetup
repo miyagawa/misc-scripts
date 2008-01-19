@@ -148,6 +148,10 @@ template: |
   1;
   __END__
 
+  =encoding utf-8
+
+  =for stopwords
+
   =head1 NAME
 
   [% module %] -
