@@ -181,6 +181,7 @@ file: MANIFEST.SKIP
 template: |
   \bRCS\b
   \bCVS\b
+  \.svn/
   ^MANIFEST\.
   ^Makefile$
   ~$
