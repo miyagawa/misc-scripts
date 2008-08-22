@@ -10,23 +10,22 @@ emulates the interface of Lifehacker.com's todo.sh script.
 =cut
 
 use Encode ();
-use YAML::Syck ();
+use YAML ();
 use LWP::UserAgent;
 use Number::RecordLocator;
 use Getopt::Long;
 use Pod::Usage;
 use Email::Address;
 use Fcntl qw(:mode);
-
-no warnings 'once';
-$YAML::Syck::ImplicitUnicode = 1;
+use File::Temp;
 
 our $CONFFILE = "$ENV{HOME}/.hiveminder";
+our $VERSION = 0.92;
 our %config = ();
 our $ua = LWP::UserAgent->new;
 our $locator = Number::RecordLocator->new();
 our $default_query = "not/complete/starts/before/tomorrow/accepted/but_first/nothing";
-our $pending_query = "pending/not/complete";
+our $unaccepted_query = "unaccepted/not/complete";
 our $requests_query = "requestor/me/not/owner/me/not/complete";
 our %args;
 
@@ -55,12 +54,17 @@ sub main {
                "hide=s",
                "owner=s",
                "help",
+               "version",
                "config=s",)
       or pod2usage(2);
 
     $CONFFILE = $args{config} if $args{config};
 
     pod2usage(0) if $args{help};
+    if ($args{version}) {
+        version();
+        exit();
+    }
 
     setup_config();
 
@@ -78,26 +82,29 @@ sub main {
     do_login() or die("Bad username/password -- edit $CONFFILE and try again.");
 
     my %commands = (
-        list     => \&list_tasks,
-        ls       => \&list_tasks,
-        add      => \&add_task,
-        do       => \&do_task,
-        done     => \&do_task,
-        del      => \&del_task,
-        rm       => \&del_task,
-        edit     => \&edit_task,
-        tag      => \&tag_task,
-        pending  => sub {list_tasks($pending_query)},
-        accept   => \&accept_task,
-        decline  => \&decline_task,
-        assign   => \&assign_task,
-        requests => sub {list_tasks($requests_query)},
-        hide     => \&hide_task,
-        comment  => \&comment_task,
-        dl       => \&download_textfile,
-        download => \&download_textfile,
-        ul       => \&upload_textfile,
-        upload   => \&upload_textfile,
+        list      => \&list_tasks,
+        ls        => \&list_tasks,
+        add       => \&add_task,
+        do        => \&do_task,
+        done      => \&do_task,
+        del       => \&del_task,
+        rm        => \&del_task,
+        edit      => \&edit_task,
+        tag       => \&tag_task,
+        unaccepted   => sub {list_tasks($unaccepted_query)},
+        accept    => \&accept_task,
+        decline   => \&decline_task,
+        assign    => \&assign_task,
+        requests  => sub {list_tasks($requests_query)},
+        hide      => \&hide_task,
+        comment   => \&comment_task,
+        dl        => \&download_textfile,
+        download  => \&download_textfile,
+        ul        => \&upload_textfile,
+        upload    => \&upload_textfile,
+        bd        => \&braindump,
+        braindump => \&braindump,
+        editdump  => \&editdump,
        );
     
     my $command = shift @ARGV || "list";
@@ -111,6 +118,11 @@ sub main {
 
 These methods deal with loading the config file, and populating it
 with selections read from the terminal on our first run.
+
+Named searches can be added to the config with a snippet like the following:
+
+  named_searches:
+    something: "due before today tag stuff"
 
 =cut
 
@@ -133,11 +145,11 @@ sub check_config_perms {
 
 sub load_config {
     return unless(-e $CONFFILE);
-    %config = %{YAML::Syck::LoadFile($CONFFILE) || {}};
+    %config = %{YAML::LoadFile($CONFFILE) || {}};
     my $sid = $config{sid};
     if($sid) {
         my $uri = URI->new($config{site});
-        $ua->cookie_jar->set_cookie(0, 'JIFTY_SID_' . $uri->port,
+        $ua->cookie_jar->set_cookie(0, 'JIFTY_SID_HIVEMINDER',
                                     $sid, '/', $uri->host, $uri->port,
                                     0, 0, undef, 1);
     }
@@ -159,14 +171,15 @@ sub new_config {
 Welcome to todo.pl! before we get started, please enter your
 Hiveminder username and password so we can access your tasklist.
 
-This information will be stored in $CONFFILE, should you ever need to
-change it.
+This information will be stored in $CONFFILE, 
+should you ever need to change it.
 
 END_WELCOME
 
     $config{site} ||= 'http://hiveminder.com';
 
     while (1) {
+        local $| = 1; # Flush buffers immediately
         print "First, what's your email address? ";
         $config{email} = <stdin>;
         chomp($config{email});
@@ -188,9 +201,15 @@ END_WELCOME
 }
 
 sub save_config {
-    YAML::Syck::DumpFile($CONFFILE, \%config);
+    YAML::DumpFile($CONFFILE, \%config);
     chmod 0600, $CONFFILE;
 }
+
+sub version {
+    print "This is hiveminder.com's todo.pl version $VERSION\n";
+
+}
+
 
 =head1 TASKS
 
@@ -200,6 +219,16 @@ methods related to manipulating tasks -- the meat of the script.
 
 sub list_tasks {
     my $query = shift || $default_query;
+
+    if( scalar @ARGV ){
+        $query = join '/', @ARGV;
+    }
+
+    #substitute actual query if this is a named search.
+    if( defined $config{named_searches}->{$query} ){
+        $query = $config{named_searches}->{$query};
+        $query =~ s!\s+!/!g;
+    }
 
     my $tag;
     $query .= "/tag/$tag" while $tag = shift @{$args{tag}};
@@ -211,9 +240,14 @@ sub list_tasks {
     $query .= "/owner/$args{owner}";
 
     my $tasks = download_tasks($query);
-
+    if (@$tasks == 0)
+    {
+        print "You have no matching tasks.\n";
+        return;
+    }
+ 
     for my $t (@$tasks) {
-        printf "%4s ", $locator->encode($t->{id});
+        printf "#%4s ", $locator->encode($t->{id});
         print '(' . priority_to_string($t->{priority}) . ') ' if $t->{priority} != 3;
         print "(Due " . $t->{due} . ") " if $t->{due};
         print $t->{summary};
@@ -248,16 +282,18 @@ sub do_task {
     my $result = call(UpdateTask =>
                       id         => $task,
                       complete   => 1);
-    result_ok($result, "Completed task");
+    result_ok($result, "Finished task");
 }
 
 sub add_task {
     my $summary = join(" ",@ARGV) or pod2usage(-message => "Must specify a task description");
     my %task = %{args_to_task()};
     $task{summary} = $summary;
+    $task{owner_id} = $config{email};
+
 
     my $result = call(CreateTask => %task);
-    result_ok($result, sub { "Created task " . $locator->encode($result->{_content}->{id}) });
+    result_ok($result, "Created task");
 }
 
 sub edit_task {
@@ -275,8 +311,8 @@ sub tag_task {
     my $task = get_task_id('tag');
     my @tags = @ARGV;
 
-    my $tasks = download_tasks("id/$task");
-    my $tags = $tasks->[0]{tags} || '';
+    my $tasks = download_tasks("id/" . $locator->encode($task));
+    my $tags = $tasks->[0]{tags} ||'';
 
     my $result = call(UpdateTask =>
                       id      => $task,
@@ -351,7 +387,7 @@ sub get_task_id {
 
 sub download_textfile {
     my $query = shift || $default_query;
-    my $filename = shift @ARGV || 'tasks.txt';
+    my $filename = shift || shift @ARGV || 'tasks.txt';
 
     my $tag;
     $query .= "/tag/$tag" while $tag = shift @{$args{tag}};
@@ -373,7 +409,7 @@ sub download_textfile {
 }
 
 sub upload_textfile {
-    my $filename = shift @ARGV;
+    my $filename = shift || shift @ARGV;
     pod2usage(-message => "Need to specify a file to upload.",
               -exitval => 1
     ) unless $filename;
@@ -387,9 +423,33 @@ sub upload_textfile {
                         content => $content,
                         format => 'sync' );
 
-    print STDOUT $result->{message} . "\n";
+    result_ok( $result, $result->{message} );
 }
 
+sub braindump {
+    my $fill_file = shift || sub {};
+
+    my $editor = $ENV{EDITOR} || $ENV{VISUAL};
+    pod2usage(-message => "You need to specify a texteditor as \$EDITOR or \$VISUAL.",
+              -exitval => 1
+    ) unless $editor;
+
+    my $fh = File::Temp->new( UNLINK => 0 );
+    my $fn = $fh->filename;
+    $fh->close;
+
+    $fill_file->( $fn );
+
+    # Call the editor with the file as the first arg
+    system( "$editor $fn" );
+    upload_textfile( $fn );
+    unlink $fn;
+}
+
+sub editdump {
+  my $query = shift || $default_query;
+  braindump( sub { download_textfile( $query, shift ) } )
+}
 
 =head1 BTDT API
 
@@ -412,7 +472,7 @@ sub do_login {
 }
 
 sub get_session_id {
-    return undef unless $ua->cookie_jar->as_string =~ /JIFTY_SID_\d+=([^;]+)/;
+    return undef unless $ua->cookie_jar->as_string =~ /JIFTY_SID_HIVEMINDER=([^;]+)/;
     return $1;
 }
 
@@ -422,7 +482,7 @@ sub download_tasks {
     my $result = call(DownloadTasks =>
                       query  => $query,
                       format => 'yaml');
-    return YAML::Syck::Load($result->{_content}{result});
+    return YAML::Load($result->{_content}{result});
 }
 
 sub call ($@) {
@@ -438,7 +498,7 @@ sub call ($@) {
     );
 
     if ( $res->is_success ) {
-        return YAML::Syck::Load($res->content)->{fnord};
+        return YAML::Load( Encode::decode_utf8($res->content) )->{$moniker};
     } else {
         die $res->status_line;
     }
@@ -447,7 +507,7 @@ sub call ($@) {
 =head2 result_ok RESULT, MESSAGE
 
 Make sure that a result returned by C<call> indicates success. If so,
-print MESSAGE. If MESSAGE is a subroutine reference, execute it to get
+print MESSAGE.  If MESSAGE is a subroutine reference, execute it to get
 the message. Otherwise, die with a descriptive error.
 
 =cut
@@ -459,7 +519,7 @@ sub result_ok {
     if(!$result->{failure}) {
         print ref($message) ? $message->() . "\n" : "$message\n";
     } else {
-        die(YAML::Syck::Dump($result));
+        die(YAML::Dump($result));
     }
     
 }
@@ -501,7 +561,6 @@ sub args_to_task {
 
     $task{tags} = join_tags(@{$args{tag}}) if $args{tag};
     $task{group_id} = $args{group} if $args{group};
-    $task{owner_id} = $config{email};
     $task{priority} = $args{priority} if $args{priority};
     $task{due} = $args{due} if $args{due};
     $task{starts} = $args{hide} if $args{hide};
@@ -522,7 +581,7 @@ todo.pl - a command-line interface to Hiveminder
 
 =head1 SYNOPSIS
 
-  todo.pl [options] list
+  todo.pl [options] list [query]
   todo.pl [options] add <summary>
   todo.pl [options] edit <task-id> [summary]
 
@@ -531,7 +590,7 @@ todo.pl - a command-line interface to Hiveminder
   todo.pl done <task-id>
   todo.pl del|rm <task-id>
 
-  todo.pl [options] pending
+  todo.pl [options] unaccepted
   todo.pl accept <task-id>
   todo.pl decline <task-id>
 
@@ -544,6 +603,8 @@ todo.pl - a command-line interface to Hiveminder
 
   todo.pl [options] download [file]
   todo.pl upload <file>
+  todo.pl braindump
+  todo.pl [options] editdump
 
     Options:
        --group                          Operate on tasks in a group
@@ -556,9 +617,16 @@ todo.pl - a command-line interface to Hiveminder
 
   todo.pl list
         List all tasks in your todo list.
+  
+  todo.pl list due before today not complete
+        List tasks that are overdue.
+  
+  todo.pl list important
+        Lists tasks specified by the named search 'important'.
+        For more on named searches, see the CONFIG FILE section of the perldoc
 
   todo.pl --tag home --tag othertag --group personal list
-        List all personl tasks (not in a group with tags 'home' and 'othertag'.
+        List personal tasks not in a group with tags 'home' and 'othertag'.
 
   todo.pl --tag cli --group hiveminders edit 3G Implement todo.pl
         Move task 3G into the hiveminders group, set its tags to
@@ -568,6 +636,24 @@ todo.pl - a command-line interface to Hiveminder
         Delete all tags from task 4J
 
   todo.pl tag 4J home
-        Add the tag ``home'' to task 4J
+        Add the tag 'home' to task 4J
+
+  todo.pl braindump
+        Open up $EDITOR to braindump tasks
+
+  todo.pl --tag sometag editdump
+        Download and edit tasks with tag 'sometag'.
+        Updates tasks after $EDITOR completes.
+
+
+This software is Copyright 2006-2008 Best Practical Solutions, LLC
+
+You may use, modify and redistribute it however you'd like to.
+Feel free to fold, spindle or mutilate it, too.
+
+=head1 CONTRIBUTORS
+
+Marc Dougherty <muncus@gmail.com>
+ added support for named queries, and queries on the commandline
 
 =cut

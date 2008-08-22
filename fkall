@@ -1,0 +1,4 @@
+#!/usr/bin/perl
+my $app = shift or die "Usage: fkall appname\n";
+system "killall", "-KILL", $app;
+system "open", "-a", $app;
