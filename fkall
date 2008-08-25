@@ -1,4 +1,44 @@
 #!/usr/bin/perl
-my $app = shift or die "Usage: fkall appname\n";
-system "killall", "-KILL", $app;
-system "open", "-a", $app;
+use strict;
+
+sub get_procs {
+    my @procs = split /\n/, qx/ps cuxww/;
+    shift @procs; # header
+    map {
+        my @cols = split /\s+/, $_, 11;
+        +{ rss => $cols[5], cmd => $cols[10] };
+    } @procs;
+}
+
+my $app = shift || 200;
+my @apps;
+if ($app =~ /^\d+$/) {
+    my @procs = get_procs();
+    for my $proc (@procs) {
+        push @apps, $proc->{cmd} if $proc->{rss} > 1024 * $app;
+    }
+} else {
+    @apps = ($app);
+}
+
+exit unless @apps;
+
+for my $app (@apps) {
+    warn "killing $app\n";
+    system "killall", $app;
+}
+
+sleep 1;
+
+my %live_apps = map { $_->{cmd} => 1 } get_procs;
+my @force_kill_apps = grep $live_apps{$_}, @apps;
+
+for my $kill_app (@force_kill_apps) {
+    warn "kill -KILL $app\n";
+    system "killall", "-KILL", $app;
+}
+
+for my $app (@apps) {
+    system "restarting $app\n";
+    system "open", "-a", $app;
+}
