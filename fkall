@@ -65,7 +65,7 @@ for my $app (@apps) {
 
 sleep 1;
 
-my %live_apps = map { $_->{cmd} => 1 } get_procs;
+my %live_apps = map { $_->{COMMAND} => 1 } get_procs;
 my @force_kill_apps = grep $live_apps{$_}, @apps;
 
 for my $kill_app (@force_kill_apps) {
