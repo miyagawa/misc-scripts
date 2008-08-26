@@ -69,7 +69,7 @@ my %live_apps = map { $_->{COMMAND} => 1 } get_procs;
 my @force_kill_apps = grep $live_apps{$_}, @apps;
 
 for my $kill_app (@force_kill_apps) {
-    nortify("force killing $app");
+    notify("force killing $app");
     system "killall", "-KILL", $app;
 }
 
