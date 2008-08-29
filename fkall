@@ -38,7 +38,7 @@ sub get_procs {
     } @procs;
 }
 
-my $app = shift || 200;
+my $app = shift || 100;
 my $confirm_kill;
 my @apps;
 if ($app =~ /^\d+$/) {
