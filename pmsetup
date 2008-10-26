@@ -94,6 +94,7 @@ template: |
   build_requires 'Test::More';
   use_test_base;
   auto_include_deps;
+  author_tests('xt');
   WriteAll;
 
 ---
@@ -104,7 +105,7 @@ template: |
 
   BEGIN { use_ok '[% module %]' }
 ---
-file: t/97_podspell.t
+file: xt/podspell.t
 template: |
   use Test::More;
   eval q{ use Test::Spelling };
@@ -116,7 +117,7 @@ template: |
   Tatsuhiko
   Miyagawa
 ---
-file: t/98_perlcritic.t
+file: xt/perlcritic.t
 template: |
   use strict;
   use Test::More;
@@ -124,7 +125,7 @@ template: |
   plan skip_all => "Test::Perl::Critic is not installed." if $@;
   all_critic_ok("lib");
 ---
-file: t/99_pod.t
+file: xt/pod.t
 template: |
   use Test::More;
   eval "use Test::Pod 1.00";
@@ -193,7 +194,6 @@ template: |
   \.gz$
   \.cvsignore
   \.shipit
-  ^t/9\d_.*\.t
 ---
 file: README
 template: |
