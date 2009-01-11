@@ -184,6 +184,7 @@ template: |
   \bRCS\b
   \bCVS\b
   \.svn/
+  \.git/
   ^MANIFEST\.
   ^Makefile$
   ~$
@@ -228,3 +229,11 @@ template: |
 file: .shipit
 template: |
   steps = FindVersion, ChangeVersion, CheckChangeLog, DistTest, Commit, Tag, MakeDist, UploadCPAN
+---
+file: .gitignore
+template: |
+  META.yml
+  Makefile
+  inc/
+  pm_to_blib
+
