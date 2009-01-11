@@ -236,4 +236,4 @@ template: |
   Makefile
   inc/
   pm_to_blib
-
+  *~
