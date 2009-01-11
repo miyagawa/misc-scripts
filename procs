@@ -1,0 +1,28 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use List::Util qw(min);
+
+sub get_procs {
+    my @procs = split /\n/, qx/ps cuxww/;
+    my @headers = split /\s+/, shift @procs;
+    map {
+        my %data;
+        @data{@headers} = split /\s+/, $_, 11;
+        \%data;
+    } @procs;
+}
+
+my $num = shift || 10;
+my @procs = sort { $b->{RSS} <=> $a->{RSS} } get_procs;
+my $memory = 0;
+for my $proc (@procs[0..min($num-1, $#procs)]) {
+    $memory += $proc->{RSS};
+    print "$proc->{COMMAND}\t$proc->{RSS}\n";
+}
+
+print "\nTop ", min($num, $#procs+1)," apps use $memory KB RAM\n";
+
+my $top = `top -l 1 -n 10`;
+$top =~ /^(PhysMem.*)$/m and print $1, "\n";
+
