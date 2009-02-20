@@ -1,0 +1,18 @@
+#!/bin/sh
+PROJ=$1
+SVNURL=$2
+AUTHORS=$HOME/.github.authors
+
+mkdir $PROJ.tmp
+cd $PROJ.tmp
+git-svn init $SVNURL --no-metadata
+git config svn.authorsfile $AUTHORS
+git-svn fetch
+cd ..
+git clone $PROJ.tmp $PROJ
+rm -r $PROJ.tmp
+cd $PROJ
+git remote rm origin
+git remote add origin git@github.com:$USER/$PROJ.git
+
+echo "Ready to run 'git push origin master'"
