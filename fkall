@@ -12,9 +12,9 @@ sub confirm {
         return $rv == 1;
     } else {
         require Term::ReadKey;
-        print STDERR "$msg [y/N] ";
+        print STDERR "$msg [Y/n] ";
         my $k = Term::ReadKey::ReadKey(0);
-        return uc($k) eq 'Y';
+        return uc($k) ne 'N';
     }
 }
 
