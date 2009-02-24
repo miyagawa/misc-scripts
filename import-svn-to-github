@@ -5,14 +5,25 @@ AUTHORS=$HOME/.github.authors
 
 mkdir $PROJ.tmp
 cd $PROJ.tmp
-git-svn init $SVNURL --no-metadata
+git svn init $SVNURL --no-metadata
 git config svn.authorsfile $AUTHORS
-git-svn fetch
+git svn fetch
 cd ..
 git clone $PROJ.tmp $PROJ
 rm -r $PROJ.tmp
 cd $PROJ
 git remote rm origin
 git remote add origin git@github.com:$USER/$PROJ.git
+
+# update conf files
+echo "git.push_to = origin" >> .shipit
+echo \\.git/ >> MANIFEST.SKIP
+cat <<EOF > .gitignore
+META.yml
+Makefile
+inc/
+pm_to_blib
+*~
+EOF
 
 echo "Ready to run 'git push origin master'"
