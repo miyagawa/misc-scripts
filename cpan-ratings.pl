@@ -19,12 +19,12 @@ for my $dist (@dist) {
     eval { $rss->parse($xml) };
     next if $@;
 
-    for my $item (@{$rss->items}) {
+    for my $item (@{$rss->{items}}) {
         my $star = ($item->{description} =~ /Rating: (\d) star/)[0] || 0;
         print( ("*") x $star, (" ") x (5 - $star), " by ", $item->{dc}->{creator}, "\n" );
     }
 
-    if (@{$rss->items}) {
+    if (@{$rss->{items}}) {
         print "  $url\n";
     }
 }
