@@ -55,8 +55,8 @@ sub write_plugin_files {
     }
 
     !system "perl Makefile.PL" or die $?;
-    !system 'make test' or die $?;
     !system 'make manifest' or die $?;
+    !system 'make test' or die $?;
     !system 'make distclean' or die $?;
 }
 
