@@ -1,0 +1,6 @@
+#!/usr/bin/perl
+use CPAN;
+CPAN::Index->force_reload;
+my $c = CPAN::CacheMgr->new;
+$c->{SCAN} = q/atstart/;
+$c->scan_cache
