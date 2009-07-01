@@ -1,0 +1,9 @@
+#!/usr/bin/perl
+use strict;
+use IO::Pty::Easy;
+
+my $pty = IO::Pty::Easy->new;
+$pty->spawn(@ARGV);
+while (my $b = $pty->read) {
+    print $b;
+}
