@@ -1,0 +1,6 @@
+#!/usr/bin/perl
+use strict;
+use YAML;
+
+print join("\n", grep { $_ ne 'perl' } keys %{ YAML::LoadFile("META.yml")->{requires} }), "\n";
+
