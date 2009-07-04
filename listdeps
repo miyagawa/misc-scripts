@@ -2,5 +2,10 @@
 use strict;
 use YAML;
 
-print join("\n", grep { $_ ne 'perl' } keys %{ YAML::LoadFile("META.yml")->{requires} }), "\n";
+my @deps = grep { $_ ne 'perl' } keys %{ YAML::LoadFile("META.yml")->{requires} });
+if ($ARGV[0] && $ARGV[0] eq '-i') {
+    system "cpan", "-i", @deps;
+} else {
+    print join "\n", @deps, "";
+}
 
