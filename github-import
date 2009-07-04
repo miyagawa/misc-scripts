@@ -5,7 +5,7 @@ AUTHORS=$HOME/.github.authors
 
 mkdir $PROJ.tmp
 cd $PROJ.tmp
-git svn init -s $SVNURL --no-metadata
+git svn init $SVNURL --no-metadata
 git config svn.authorsfile $AUTHORS
 git svn fetch
 cd ..
