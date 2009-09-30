@@ -90,7 +90,7 @@ template: |
   use inc::Module::Install;
   name '[% dist %]';
   all_from 'lib/[% path %]';
-
+  readme_from 'lib/[% path %]';
   build_requires 'Test::More';
   use_test_base;
   auto_include_deps;
