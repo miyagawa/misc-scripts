@@ -92,7 +92,6 @@ template: |
   all_from 'lib/[% path %]';
   readme_from 'lib/[% path %]';
   build_requires 'Test::More';
-  use_test_base;
   test_requires 'Test::Requires';
   auto_include_deps;
   author_tests('xt');
