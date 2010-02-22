@@ -46,7 +46,7 @@ sub write_plugin_files {
 
     my @template = YAML::Load(join '', <DATA>);
     my $vars = { module => $module, dist => $dist, path => $path,
-                 config => $config, localtime => scalar localtime };
+                 config => $config, localtime => scalar localtime, year => (localtime)[5] + 1900 };
 
     for my $tmpl (@template) {
         my $file = $tmpl->{file};
@@ -87,6 +87,8 @@ __DATA__
 ---
 file: Makefile.PL
 template: |
+  sub readme_from {}
+  sub auto_set_repository {}
   use inc::Module::Install;
   name '[% dist %]';
   all_from 'lib/[% path %]';
@@ -177,6 +179,10 @@ template: |
   =head1 AUTHOR
 
   [% config.author %] E<lt>[% config.email %]E<gt>
+
+  =head1 COPYRIGHT
+
+  Copyright [% year %]- [% config.author %]
 
   =head1 LICENSE
 
