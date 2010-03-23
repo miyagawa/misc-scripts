@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 use strict;
 use warnings;
 use ExtUtils::MakeMaker qw(prompt);
@@ -88,15 +88,10 @@ __DATA__
 file: Makefile.PL
 template: |
   use inc::Module::Install;
-  use Module::Install::ReadmeFromPod;
-  use Module::Install::AuthorTests;
-  use Module::Install::Repository
-  name '[% dist %]';
   all_from 'lib/[% path %]';
   readme_from('lib/[% path %]');
-  build_requires 'Test::More';
+  build_requires 'Test::More', 0.88;
   test_requires 'Test::Requires';
-  author_tests('xt');
   auto_set_repository();
   WriteAll;
 
@@ -108,39 +103,12 @@ template: |
 
   BEGIN { use_ok '[% module %]' }
 ---
-file: xt/podspell.t
-template: |
-  use Test::More;
-  eval q{ use Test::Spelling };
-  plan skip_all => "Test::Spelling is not installed." if $@;
-  add_stopwords(<DATA>);
-  set_spell_cmd("aspell -l en list");
-  all_pod_files_spelling_ok('lib');
-  __DATA__
-  Tatsuhiko
-  Miyagawa
----
-file: xt/perlcritic.t
-template: |
-  use strict;
-  use Test::More;
-  eval q{ use Test::Perl::Critic };
-  plan skip_all => "Test::Perl::Critic is not installed." if $@;
-  all_critic_ok("lib");
----
 file: xt/pod.t
 template: |
   use Test::More;
   eval "use Test::Pod 1.00";
   plan skip_all => "Test::Pod 1.00 required for testing POD" if $@;
   all_pod_files_ok();
----
-file: xt/synopsis.t
-template: |
-  use Test::More;
-  eval "use Test::Synopsis";
-  plan skip_all => "Test::Synopsis required" if $@;
-  all_synopsis_ok();
 ---
 file: Changes
 template: |

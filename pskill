@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 my $sig = $ARGV[0] || 2;
    $sig =~ s/^-(\d+)/$1/;
 
