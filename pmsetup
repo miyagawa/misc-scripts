@@ -215,6 +215,7 @@ template: |
 ---
 file: .gitignore
 template: |
+  MYMETA.*
   META.yml
   Makefile
   inc/
