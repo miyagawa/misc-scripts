@@ -54,7 +54,7 @@ sub write_plugin_files {
         write_file($file, $tmpl->{template}, $vars);
     }
 
-    !system "perl Makefile.PL" or die $?;
+    !system "perl Makefile.PL NO_MYMETA=1" or die $?;
     !system 'make manifest' or die $?;
     !system 'make test' or die $?;
     !system 'make distclean' or die $?;
@@ -177,6 +177,7 @@ template: |
   \.gz$
   \.cvsignore
   \.shipit
+  MYMETA
 ---
 file: README
 template: |
