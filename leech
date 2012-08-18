@@ -1,0 +1,3 @@
+#!/bin/sh
+URL=$1
+osascript -e 'tell Application "Leech"' -e "download URLs \"$URL\"" -e 'end tell'
