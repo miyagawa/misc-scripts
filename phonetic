@@ -1,0 +1,15 @@
+#!/usr/bin/env perl
+use strict;
+
+my @code = qw( Alfa Bravo Charlie Delta Echo Foxtrot Golf Hotel India Juliett Kilo Lima
+               Mike November Oscar Papa Quebec Romeo Sierra Tango Uniform Victor Whiskey
+               X-ray Yankee Zulu );
+
+my %code;
+for my $word (@code) {
+    $code{substr($word, 0, 1)} = $word;
+}
+
+for my $char (split //, join '', @ARGV) {
+    print uc($char), " as ", $code{uc $char}, "\n";
+}
