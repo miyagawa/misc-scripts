@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+require 'chronic'
+require 'open3'
+
+class Task
+  attr_accessor :time, :about
+  def initialize(time, about)
+    @time = Chronic.parse(time)
+    @about = about
+  end
+
+  def queue
+    Open3.popen3('at', '-t', @time.strftime("%y%m%d%H%M")) do |stdin, stdout, stderr|
+      stdin.write("pushme '#{@about}'\n")
+      stdin.close_write
+      puts stderr.read
+      puts stdout.read
+    end
+  end
+end
+
+def parse(text)
+  if text.match /((?:in|on|at).*)(?:about|for|to)(.*)$/
+    Task.new($1, $2)
+  else
+    raise ArgumentError, "Couldn't parse text: say 'remind in 5 minutes about milk'"
+  end
+end
+
+task = parse ARGV.join(' ')
+task.queue
