@@ -10,18 +10,14 @@ class Task
   end
 
   def queue
-    Open3.popen3('at', '-t', @time.strftime("%y%m%d%H%M")) do |stdin, stdout, stderr|
-      stdin.write("pushme '#{@about}'\n")
-      stdin.close_write
-      puts stderr.read
-      puts stdout.read
-    end
+    sec = @time.to_i - Time.now.to_i
+    system %Q[sleep #{sec} && pushme "#{about}" &]
   end
 end
 
 def parse(text)
   if text.match /((?:in|on|at).*)(?:about|for|to)(.*)$/
-    Task.new($1, $2)
+    Task.new($1, $2.strip)
   else
     raise ArgumentError, "Couldn't parse text: say 'remind in 5 minutes about milk'"
   end
