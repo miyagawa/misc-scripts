@@ -11,11 +11,12 @@ class Task
 
   def queue
     sec = @time.to_i - Time.now.to_i
-    system %Q[ssh #{ENV['HOME_MAC']} 'sleep #{sec} && pushme "#{about}" &']
+    system %Q[ssh #{ENV['HOME_MAC']} 'sleep #{sec} && ~/bin/pushme "#{about}" &']
   end
 end
 
 def parse(text)
+  text.sub! /^me +/, ''
   if text.match /((?:in|on|at).*)(?:about|for|to)(.*)$/
     Task.new($1, $2.strip)
   else
