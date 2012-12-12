@@ -11,7 +11,7 @@ class Task
 
   def queue
     sec = @time.to_i - Time.now.to_i
-    system %Q[ssh #{ENV['HOME_MAC']} 'sleep #{sec} && ~/bin/pushme "#{about}" &']
+    system %Q[sleep #{sec} && pushme "#{about}" &]
   end
 end
 
