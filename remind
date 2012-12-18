@@ -17,10 +17,10 @@ end
 
 def parse(text)
   text.sub! /^me +/, ''
-  if text.match /((?:in|on|at).*)(?:about|for|to)(.*)$/
+  if text.match /((?:in|on|at|now).*)(?:about|for|to)(.*)$/
     Task.new($1, $2.strip)
   else
-    raise ArgumentError, "Couldn't parse text: say 'remind in 5 minutes about milk'"
+    puts "Couldn't parse text: say 'remind in 5 minutes about milk'"
   end
 end
 
