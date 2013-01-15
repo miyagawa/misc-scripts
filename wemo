@@ -1,0 +1,59 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use WebService::Belkin::WeMo::Discover;
+use WebService::Belkin::WeMo::Device;
+
+package Locator;
+
+my $db = "$ENV{HOME}/.wemo.db";
+
+sub find {
+    my($class, $name) = @_;
+
+    my $client = WebService::Belkin::WeMo::Discover->new;
+    my $wemos;
+    if (-e $db) {
+        $wemos = $client->load($db);
+    } else {
+        $wemos = $client->search;
+        $client->save($db);
+    }
+
+    my $matcher = $name ? sub { $_[0] =~ /\Q$name\E/i } : sub { 1 };
+
+    for my $ip (sort keys %$wemos) {
+        if ($matcher->($wemos->{$ip}->{name})) {
+            return WebService::Belkin::WeMo::Device->new(ip => $ip, db => $db);
+        }
+    }
+
+    return;
+}
+
+package main;
+
+my($cmd, $name) = @ARGV;
+my $wemo = Locator->find($name) or die "Could not locate Wemo\n";
+
+my %commands = (
+    't'      => \&cmd_toggle,
+    'toggle' => \&cmd_toggle,
+    'on'     => \&cmd_on,
+    'off'    => \&cmd_off,
+    'status' => \&cmd_status,
+    's'      => \&cmd_status,
+);
+
+my $command = $commands{$cmd || ''} or die "Usage: wemo [toggle|on|off|status] [name]\n";
+
+$command->($wemo);
+
+sub cmd_toggle { shift->toggleSwitch }
+sub cmd_on     { shift->on }
+sub cmd_off    { shift->off }
+
+sub cmd_status {
+    my $wemo = shift;
+    printf "%s at %s is %s\n", $wemo->getFriendlyName, $wemo->{_ip}, ($wemo->isSwitchOn ? "On" : "Off");
+}
