@@ -65,7 +65,7 @@ my %commands = (
     's'      => [ \&cmd_status, 1 ],
 );
 
-my $command = $commands{$cmd || ''} or die "Usage: wemo [reload|toggle|on|off|status] [name]\n";
+my $command = $commands{$cmd || ''} or die "Usage: wemo [list|reload|toggle|on|off|status] [name]\n";
 
 my($sub, $want) = @$command;
 
