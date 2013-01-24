@@ -9,11 +9,11 @@ package Locator;
 my $db = "$ENV{HOME}/.wemo.db";
 
 sub find {
-    my($class, $name) = @_;
+    my($class, $name, $refresh) = @_;
 
     my $client = WebService::Belkin::WeMo::Discover->new;
     my $wemos;
-    if (-e $db) {
+    if (!$refresh && -e $db) {
         $wemos = $client->load($db);
     } else {
         $wemos = $client->search;
@@ -32,22 +32,35 @@ sub find {
 }
 
 package main;
+use Getopt::Std;
 
 my($cmd, $name) = @ARGV;
-my $wemo = Locator->find($name) or die "Could not locate Wemo\n";
 
 my %commands = (
-    't'      => \&cmd_toggle,
-    'toggle' => \&cmd_toggle,
-    'on'     => \&cmd_on,
-    'off'    => \&cmd_off,
-    'status' => \&cmd_status,
-    's'      => \&cmd_status,
+    'r'      => [ \&cmd_reload, 0 ],
+    'reload' => [ \&cmd_reload, 0 ],
+    't'      => [ \&cmd_toggle, 1 ],
+    'toggle' => [ \&cmd_toggle, 1 ],
+    'on'     => [ \&cmd_on, 1 ],
+    'off'    => [ \&cmd_off, 1 ],
+    'status' => [ \&cmd_status, 1 ],
+    's'      => [ \&cmd_status, 1 ],
 );
 
-my $command = $commands{$cmd || ''} or die "Usage: wemo [toggle|on|off|status] [name]\n";
+my $command = $commands{$cmd || ''} or die "Usage: wemo [reload|toggle|on|off|status] [name]\n";
 
-$command->($wemo);
+my($sub, $want) = @$command;
+
+if ($want) {
+    my $wemo = Locator->find($name) or die "Could not locate Wemo\n";
+    $sub->($wemo);
+} else {
+    $sub->();
+}
+
+sub cmd_reload {
+    Locator->find(undef, 1);
+}
 
 sub cmd_toggle { shift->toggleSwitch }
 sub cmd_on     { shift->on }
