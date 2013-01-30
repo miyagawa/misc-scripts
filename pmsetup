@@ -8,19 +8,21 @@ use File::Spec;
 use Template;
 use YAML;
 
+sub ask {
+    my($prompt, $field, $config, $save_ref) = @_;
+    while (! $config->{$field}) {
+        $config->{$field} = prompt("$prompt: ", '');
+        $$save_ref++;
+    }
+}
+
 my $path   = File::Spec->catfile($ENV{HOME}, "/.pmsetuprc");
 my $config = eval { YAML::LoadFile($path) } || {};
 
 my $save;
-while (! $config->{author}) {
-    $config->{author} = prompt("Your name: ", '');
-    $save++;
-}
-
-while (! $config->{email}) {
-    $config->{email} = prompt("Your email: ", '');
-    $save++;
-}
+ask 'Your name', 'author', $config, \$save;
+ask 'Your email', 'email', $config, \$save;
+ask 'Github account', 'github_user', $config, \$save;
 
 my $modname = shift @ARGV or die "Usage: $0 module\n";
    $modname =~ s/-/::/g;
@@ -94,8 +96,8 @@ template: |
   test_requires 'Test::Requires';
   auto_set_repository();
   resources
-    homepage      => "https://github.com/miyagawa/[% dist %]",
-    bugtracker    => "https://github.com/miyagawa/[% dist %]/issues";
+    homepage      => "https://github.com/[% config.github_user %]/[% dist %]",
+    bugtracker    => "https://github.com/[% config.github_user %]/[% dist %]/issues";
   auto_provides;
   WriteAll;
 
