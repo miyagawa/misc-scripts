@@ -12,7 +12,7 @@ my @ping = (
     'http://www.bloglines.com/ping',
     'http://rpc.reader.livedoor.com/ping',
     'http://blogsearch.google.com/ping/RPC2',
-    'http://ping.superfeedr.com/rpc',
+#    'http://ping.superfeedr.com/rpc',
 );
 
 our $changed;
