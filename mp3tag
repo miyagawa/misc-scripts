@@ -1,0 +1,8 @@
+#!/usr/bin/env perl
+use MP3::Tag;
+my $mp3 = MP3::Tag->new(shift);
+$mp3->get_tags();
+
+use Data::Dumper;
+warn Dumper $mp3;
+
