@@ -1,0 +1,21 @@
+#!/usr/bin/env perl
+use strict;
+use Image::ExifTool qw(:Public);
+use Date::Parse;
+
+for my $file (@ARGV) {
+    my $date = ImageInfo($file, 'DateCreated')->{'DateCreated'};
+    unless ($date) {
+        warn "Couldn't get DateCreated EXIF from $file\n";
+        next;
+    }
+
+    my $time = Date::Parse::str2time($date);
+    unless ($time) {
+        warn "Couldn't parse date: $date\n";
+        next;
+    }
+
+    warn "Touching $file -> $time\n";
+    utime $time, $time, $file;
+}
