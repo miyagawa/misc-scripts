@@ -5,8 +5,9 @@ use Time::Local qw(timelocal);
 my $time = time;
 
 if (@ARGV) {
+    my $str = join " ", @ARGV;
     require Date::Parse;
-    $time = Date::Parse::str2time(join " ",@ARGV) or die "Can't parse '$ARGV[0]'";
+    $time = Date::Parse::str2time($str) or die "Can't parse '$str'";
 }
 
 my @today = localtime $time;
