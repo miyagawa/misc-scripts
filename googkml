@@ -1,0 +1,16 @@
+#!/usr/bin/env perl
+use strict;
+use Time::Local qw(timelocal);
+
+my $time = time;
+
+if (@ARGV) {
+    require Date::Parse;
+    $time = Date::Parse::str2time(join " ",@ARGV) or die "Can't parse '$ARGV[0]'";
+}
+
+my @today = localtime $time;
+my $start = timelocal(0, 0, 0, @today[3..5]) * 1000;
+my $end   = $start + 24 * 60 * 60 * 1000;
+
+system "open", "https://maps.google.com/locationhistory/b/0/kml?startTime=$start&endTime=$end";
