@@ -1,0 +1,69 @@
+#!/usr/bin/env perl
+# ONO Hiroki onohiroki@cup.com
+# http://onohiroki.cycling.jp/comp-google-latitude
+# Usage: $ ./latitude_kml2gpx.pl *.kml
+
+use strict;
+use warnings;
+use Data::Dumper;
+use Encode;
+use utf8;
+use open ":utf8";
+binmode STDIN,  ":utf8";
+binmode STDOUT, ":utf8";
+binmode STDERR, ":utf8";
+
+for my $datafile (@ARGV) {
+    warn "---> Reading $datafile\n";
+
+    (my $gpx_file = $datafile) =~ s/\.kml$/\.gpx/;
+
+    if (-e $gpx_file) {
+        warn "---> Skipping $gpx_file since it already exists.\n";
+        next;
+    }
+
+    open my $kml, "<", $datafile or die "Can't open $datafile: $!";
+    open my $gpx, ">", $gpx_file or die "Can't open $gpx_file: $!";
+
+    print $gpx <<'EOS';
+<gpx xmlns="http://www.topografix.com/GPX/1/1"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.topografix.com/GPX/1/1
+ http://www.topografix.com/GPX/1/1/gpx.xsd">
+ <trk>
+EOS
+
+    my $time = "";
+    my $date = "";
+    my $point = 0;
+
+    while (<$kml>) {
+        if (m#<when>(.*)</when>#) {
+            $time = $1;
+            if ($date eq q{}) {
+                $date = $time;
+                $date =~ s/T.*$//;
+                print $gpx "  <name>$date</name>\n";
+                print $gpx "  <desc>$date</desc>\n";
+                print $gpx "  <trkseg>\n";
+            }
+            $time = convert_datetime($time);
+        }
+        if (m#<gx:coord>(\S+)\s+(\S+)\s+(\S+)</gx:coord>#) {
+            $point++;
+            print $gpx q{   <trkpt lat="}.$2.q{" lon="}.$1.q{">};
+            print $gpx "\n    <ele>$3</ele>\n    <time>$time</time>\n   </trkpt>\n";
+        }
+    }
+    print $gpx "  </trkseg>\n </trk>\n</gpx>\n";
+
+    warn "---> Finished exporting $gpx_file ($point trackpoints)\n";
+}
+
+sub convert_datetime {
+    use DateTime::Format::HTTP;
+    my $dt = DateTime::Format::HTTP->parse_datetime($_[0]);
+    $dt->set_time_zone('UTC');
+    return $dt . "Z";
+}
