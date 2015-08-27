@@ -1,0 +1,6 @@
+#!/usr/bin/env perl
+use strict;
+use Digest::MD5 qw(md5_hex);
+
+my $hash = md5_hex($ARGV[0]);
+system "open", "http://gravatar.com/avatar/$hash";
