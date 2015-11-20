@@ -23,7 +23,9 @@ for my $datafile (@ARGV) {
         next;
     }
 
-    open my $kml, "<", $datafile or die "Can't open $datafile: $!";
+    open my $fh, "<", $datafile or die "Can't open $datafile: $!";
+    my $kml = join '', <$fh>;
+    
     open my $gpx, ">", $gpx_file or die "Can't open $gpx_file: $!";
 
     print $gpx <<'EOS';
@@ -38,8 +40,9 @@ EOS
     my $date = "";
     my $point = 0;
 
-    while (<$kml>) {
-        if (m#<when>(.*)</when>#) {
+    while ($kml =~ m!(<when>.*?</gx:coord>)!sg) {
+        my $data = $1;
+        if ($data =~ m#<when>(.*?)</when>#) {
             $time = $1;
             if ($date eq q{}) {
                 $date = $time;
@@ -50,7 +53,8 @@ EOS
             }
             $time = convert_datetime($time);
         }
-        if (m#<gx:coord>(\S+)\s+(\S+)\s+(\S+)</gx:coord>#) {
+
+        if ($data =~ m#<gx:coord>(\S+)\s+(\S+)\s+(\S+)</gx:coord>#) {
             $point++;
             print $gpx q{   <trkpt lat="}.$2.q{" lon="}.$1.q{">};
             print $gpx "\n    <ele>$3</ele>\n    <time>$time</time>\n   </trkpt>\n";
