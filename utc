@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+require 'chronic'
+ARGV = ['now'] if ARGV.empty?
+
+puts Chronic.parse(ARGV.join(' ')).utc
+
